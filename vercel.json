@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/static/html/index.html"
+    },
+    {
+      "src": "/(.*\\.html)",
+      "dest": "/static/html/$1"
+    },
+    {
       "source": "/js/(.*)",
       "destination": "/static/js/$1"
     },
