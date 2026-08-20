@@ -11,3 +11,4 @@
 *.git* text eol=lf
 vercel.json text eol=lf
 .vercelignore text eol=lf
+*.tml text eol=lf
