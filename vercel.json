@@ -5,8 +5,8 @@
       "destination": "/static/html/index.html"
     },
     {
-      "src": "/(.*\\.html)",
-      "dest": "/static/html/$1"
+      "source": "/(.*\\.html)",
+      "destination": "/static/html/$1"
     },
     {
       "source": "/js/(.*)",
