@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/js/(.*)",
+      "destination": "/static/js/$1"
+    },
+    {
+      "source": "/(.*).html",
+      "destination": "/static/html/$1.html"
+    },
+    {
+      "source": "/css/(.*)",
+      "destination": "/static/css/$1"
+    },
+    {
+      "source": "/(.*).css",
+      "destination": "/static/css/$1.css"
+    },
+    {
+      "source": "/(.*).js",
+      "destination": "/static/js/$1.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/webserver/app.py"
+    }
+  ]
+}
