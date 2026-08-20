@@ -1,0 +1,5 @@
+*.ino  text diff=cpp eol=lf
+*.h    text eol=lf
+*.cpp  text eol=lf
+*.example text eol=lf
+*.h.example text diff=cpp eol=lf
