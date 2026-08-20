@@ -3,3 +3,4 @@
 *.cpp  text eol=lf
 *.example text eol=lf
 *.h.example text diff=cpp eol=lf
+*.py text diff=py eol=lf
