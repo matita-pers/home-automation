@@ -1,5 +1,8 @@
 from flask import Flask
-import os
+import os, sys
+
+# force this file dir into the module search path
+sys.path.append(str(Path(__file__).resolve().parent))
 
 import login
 
