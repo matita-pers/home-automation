@@ -1,11 +1,10 @@
-from flask import Flask
+from flask import Flask, session, request
 import os, sys
 from pathlib import Path
+import login, admin
 
 # force this file dir into the module search path
 sys.path.append(str(Path(__file__).resolve().parent))
-
-import login
 
 app = Flask(__name__, static_folder="../static")
 
@@ -14,18 +13,53 @@ app.config['session.permanent'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = 60 * 60 * 24 * 7 # a week
 
 login.load(app)
+admin.load(app)
+
+def send_404():
+    if request.path.startswith("/api/"):
+        return {"code": 404, "status": "not found", "message": "not found"}, 404
+    return app.send_static_file("html/404.html"), 404
+
+@app.errorhandler(404)
+def _page_not_found(e):
+    send_404()
 
 @app.route("/api/health")
-def health():
-    return "OK"
+def _health():
+    return "{\"code\":200,\"status\":\"ok\"}", 200
 
 @app.route("/")
-def index():
+def _get_homepage():
     return app.send_static_file("html/index.html")
 
-@app.route("/<path:path>")
-def static_proxy(path):
-    print(path)
+@app.route("/site-urls")
+@login.require_admin
+def _get_site_urls():
+    return [x.rule for x in app.url_map.iter_rules()]
+
+@app.route("/admin/<path:path>")
+def _serve_static_admin_file(path):
     if path.endswith(".html"):
+        return app.send_static_file("html/admin" + path)
+    return app.send_static_file(path)
+
+@app.route("/users/<path:path>")
+@login.require_login
+def _serve_static_user_file(path):
+    if path.endswith(".html"):
+        return app.send_static_file("html/users" + path)
+    return app.send_static_file(path)
+
+@app.route("/<path:path>")
+def _serve_static_file(path: str):
+    file = path.split("/")[-1]
+    ext = file.split(".")[-1]
+    if file == "":
+        path = path.lstrip("/")
+    if ext == "" or file.find(".") <= 0:
+        ext = "html"
+        path += ".html"
+
+    if ext.lower() == "html":
         return app.send_static_file("html/" + path)
     return app.send_static_file(path)
