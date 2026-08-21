@@ -1,5 +1,6 @@
 from flask import Flask
-import os, sys, Path
+import os, sys
+from pathlib import Path
 
 # force this file dir into the module search path
 sys.path.append(str(Path(__file__).resolve().parent))
