@@ -1,35 +1,41 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "backend/app.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/static/html/index.html"
+      "source": "/",
+      "destination": "/static/html/index.html"
     },
     {
-      "src": "/(.*\\.html)",
-      "dest": "/static/html/$1"
+      "source": "/:path*.html",
+      "destination": "/static/html/:path*.html"
     },
     {
-      "src": "/(?:js/)?(.*\\.js)",
-      "dest": "/static/js/$1"
+      "source": "/js/:path*.js",
+      "destination": "/static/js/:path*.js"
     },
     {
-      "src": "/(?:css/)?(.*\\.css)",
-      "dest": "/static/css/$1"
+      "source": "/:path*.js",
+      "destination": "/static/js/:path*.js"
     },
     {
-      "src": "/(?:images?/|img/)?(.*\\.(png|jpg|jpeg|gif|svg|webp|ico))",
-      "dest": "/static/images/$1"
+      "source": "/css/:path*.css",
+      "destination": "/static/css/:path*.css"
     },
     {
-      "src": "/(.*)",
-      "dest": "backend/app.py"
+      "source": "/:path*.css",
+      "destination": "/static/css/:path*.css"
+    },
+    {
+      "source": "/(images|img)/:path*",
+      "destination": "/static/images/:path*"
+    },
+    {
+      "source": "/:path*.(png|jpg|jpeg|gif|svg|webp|ico)",
+      "destination": "/static/images/:path*.$1"
+    },
+    {
+      "source": "/((?!static/).*)",
+      "destination": "/backend/app.py"
     }
   ]
 }
