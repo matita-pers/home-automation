@@ -10,32 +10,41 @@
       "destination": "/static/html/:path*.html"
     },
     {
-      "source": "/js/:path*.js",
-      "destination": "/static/js/:path*.js"
-    },
-    {
-      "source": "/:path*.js",
-      "destination": "/static/js/:path*.js"
-    },
-    {
       "source": "/css/:path*.css",
       "destination": "/static/css/:path*.css"
     },
     {
-      "source": "/:path*.css",
-      "destination": "/static/css/:path*.css"
+      "source": "/js/:path*.js",
+      "destination": "/static/js/:path*.js"
     },
     {
-      "source": "/(images|img)/:path*",
+      "source": "/images/:path*",
       "destination": "/static/images/:path*"
     },
     {
       "source": "/:path*.(png|jpg|jpeg|gif|svg|webp|ico)",
-      "destination": "/static/images/:path*.$1"
+      "destination": "/static/images/:path*"
     },
     {
-      "source": "/((?!static/).*)",
-      "destination": "/backend/app.py"
+      "source": "/(.*)",
+      "destination": "/webserver/app.py"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.html|/css/.+|/js/.+|/images/.+|.*\\.(png|jpg|jpeg|gif|svg|webp|ico))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "caching": [
+    {
+      "source": "/api/(.*)",
+      "cacheType": "bypass"
     }
   ]
 }
