@@ -1,0 +1,106 @@
+name: Auto Promote auto/* PRs
+
+on:
+  deployment_status:
+    types: [success]
+    environment: Preview
+
+permissions:
+  contents: write
+  pull-requests: read
+  deployments: read
+
+jobs:
+  login-app:
+    name: Login the GitHub App
+    runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.login.outputs.token }}
+    steps:
+      - name: Login to GitHub App
+        uses: actions/create-github-app-token@v3
+        id: login
+        with:
+          client-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+  find-pr:
+    name: Find Associated PR
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.find-pr.outputs.pr_number }}
+      head_sha: ${{ steps.find-pr.outputs.head_sha }}
+    steps:
+      - name: Find PR for deployment
+        id: find-pr
+        run: |
+          sha="${{ github.event.deployment.sha }}"
+          echo "Finding PR for deployment SHA: $sha, environment: ${{ github.event.deployment.environment }}"
+
+          # Find open PRs with this HEAD SHA
+          prs=$(gh api repos/${{ github.repository }}/pulls --jq ".[] | select(.head.sha == \"$sha\") | .number")
+
+          if [ -z "prs" ]; then
+            echo "::error::No open PR found with deployment SHA $sha"
+            exit 1
+          fi
+
+          # Get the first matching PR
+          number=$(echo "prs" | head -n 1)
+
+          echo "pr_number=$number" >> $GITHUB_OUTPUT
+          echo "head_sha=$sha" >> $GITHUB_OUTPUT
+          echo "Found PR #$number for deployment"
+          echo "${{ github.event.deployment }}"
+
+  check-pr:
+    needs:
+      - login-app
+      - find-pr
+    env:
+      GH_TOKEN: ${{ needs.login-app.outputs.token }}
+      PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
+      COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: setup-git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - id: check-author
+        run: |
+          author=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -- jq '.user.id')
+          echo "PR author: $author"
+          case "$author" in
+            155455608) ;;
+            *)
+              echo "::error::PR author $author is not authorized for auto-merge"
+              exit 1
+              ;;
+          esac
+
+      - id: check-base
+        run: |
+          base=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -- jq '.base.ref')
+          echo "base branch: $base"
+          case "$base" in
+            main) ;;
+            *)
+              echo "::error::base branch is not enabled for auto-merge: $base"
+              exit 1
+              ;;
+          esac
+
+      - id: check-head
+        run: |
+          head=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -- jq '.base.ref')
+          echo "head branch: $head"
+          case "$head" in
+            auto/*) ;; # created by push hook on main
+            feat/*) ;;
+            *)
+              echo "::error::head branch is not enabled for auto-merge: $head"
+              exit 1
+              ;;
+          esac
