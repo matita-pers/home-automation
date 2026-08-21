@@ -1,36 +1,35 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/",
-      "destination": "/static/html/index.html"
+      "src": "backend/app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/static/html/index.html"
     },
     {
-      "source": "/(.*\\.html)",
-      "destination": "/static/html/$1"
+      "src": "/(.*\\.html)",
+      "dest": "/static/html/$1"
     },
     {
-      "source": "/js/(.*)",
-      "destination": "/static/js/$1"
+      "src": "/(?:js/)?(.*\\.js)",
+      "dest": "/static/js/$1"
     },
     {
-      "source": "/(.*).html",
-      "destination": "/static/html/$1.html"
+      "src": "/(?:css/)?(.*\\.css)",
+      "dest": "/static/css/$1"
     },
     {
-      "source": "/css/(.*)",
-      "destination": "/static/css/$1"
+      "src": "/(?:images?/|img/)?(.*\\.(png|jpg|jpeg|gif|svg|webp|ico))",
+      "dest": "/static/images/$1"
     },
     {
-      "source": "/(.*).css",
-      "destination": "/static/css/$1.css"
-    },
-    {
-      "source": "/(.*).js",
-      "destination": "/static/js/$1.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/webserver/app.py"
+      "src": "/(.*)",
+      "dest": "backend/app.py"
     }
   ]
 }

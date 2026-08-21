@@ -19,15 +19,13 @@ login.load(app)
 def health():
     return "OK"
 
-# vercel serves static files directly, but for testing this is needed to serve them
-if not os.environ.get("VERCEL") == 1:
-    @app.route("/")
-    def index():
-        return app.send_static_file("html/index.html")
+@app.route("/")
+def index():
+    return app.send_static_file("html/index.html")
 
-    @app.route("/<path:path>")
-    def static_proxy(path):
-        print(path)
-        if path.endswith(".html"):
-            return app.send_static_file("html/" + path)
-        return app.send_static_file(path)
+@app.route("/<path:path>")
+def static_proxy(path):
+    print(path)
+    if path.endswith(".html"):
+        return app.send_static_file("html/" + path)
+    return app.send_static_file(path)
