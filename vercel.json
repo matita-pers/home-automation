@@ -40,11 +40,5 @@
         }
       ]
     }
-  ],
-  "caching": [
-    {
-      "source": "/api/(.*)",
-      "cacheType": "bypass"
-    }
   ]
 }
