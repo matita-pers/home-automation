@@ -9,19 +9,19 @@ permissions:
   deployments: read
 
 jobs:
-  login-app:
-    name: Login the GitHub App
-    runs-on: ubuntu-latest
-    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
-    outputs:
-      token: ${{ steps.login.outputs.token }}
-    steps:
-      - name: Login to GitHub App
-        uses: actions/create-github-app-token@v3
-        id: login
-        with:
-          client-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_KEY }}
+#  login-app:
+#    name: Login the GitHub App
+#    runs-on: ubuntu-latest
+#    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
+#    outputs:
+#      token: ${{ steps.login.outputs.token }}
+#    steps:
+#      - name: Login to GitHub App
+#        uses: actions/create-github-app-token@v3
+#        id: login
+#        with:
+#          client-id: ${{ secrets.GH_APP_ID }}
+#          private-key: ${{ secrets.GH_APP_KEY }}
 
   find-pr:
     name: Find Associated PR
@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: Find PR for deployment
         id: find-pr
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           sha="${{ github.event.deployment.sha }}"
           echo "Finding PR for deployment SHA: $sha, environment: ${{ github.event.deployment.environment }}"
@@ -59,12 +61,19 @@ jobs:
       # - login-app
       - find-pr
     env:
-      #GHx_TOKEN: ${{ needs.login-app.outputs.token }}
+      #GH_TOKEN: ${{ needs.login-app.outputs.token }}
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
       COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     runs-on: ubuntu-latest
     steps:
+      - name: Login to GitHub App
+        uses: actions/create-github-app-token@v3
+        id: login
+        with:
+          client-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
       - id: check-draft
         run: |
           draft=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.draft')
