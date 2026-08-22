@@ -59,7 +59,8 @@ jobs:
       # - login-app
       - find-pr
     env:
-      #GH_TOKEN: ${{ needs.login-app.outputs.token }}
+      #GHx_TOKEN: ${{ needs.login-app.outputs.token }}
+      GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
       COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     runs-on: ubuntu-latest
@@ -119,6 +120,7 @@ jobs:
       - check-pr
       - find-pr
     env:
+      GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
       COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     steps:
@@ -128,6 +130,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: true
 
       - id: rebase
         run: |
