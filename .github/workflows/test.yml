@@ -19,3 +19,5 @@ jobs:
          echo "github.event.deployment_status.type: " "${{ github.event.deployment_status.type }}"
          echo "github.event.deployment.sha: " "${{ github.event.deployment.sha }}"
          echo "github.event.deployment_status.sha: " "${{ github.event.deployment_status.sha }}"
+     - name: dump context
+       run: echo "${{ toJson(github) }}"
