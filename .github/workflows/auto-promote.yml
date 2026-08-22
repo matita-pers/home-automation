@@ -75,6 +75,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_KEY }}
 
       - id: check-draft
+        name: Check if PR is draft
         run: |
           draft=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.draft')
           case "$draft" in
@@ -86,6 +87,7 @@ jobs:
           esac
 
       - id: check-author
+        name: Check if PR author is authorized
         run: |
           author=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.user.id')
           echo "PR author: $author"
@@ -98,6 +100,7 @@ jobs:
           esac
 
       - id: check-base
+        name: Check if base branch is eligible for auto-merge
         run: |
           base=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.base.ref')
           echo "base branch: $base"
@@ -110,8 +113,9 @@ jobs:
           esac
 
       - id: check-head
+        name: Check if head branch is eligible for auto-merge
         run: |
-          head=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.base.ref')
+          head=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.head.ref')
           echo "head branch: $head"
           case "$head" in
             auto/*) ;; # created by push hook on main
@@ -134,6 +138,7 @@ jobs:
       COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     steps:
       - id: setup-git
+        name: Setup git configs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -143,6 +148,7 @@ jobs:
           persist-credentials: true
 
       - id: rebase
+        name: Rebase PR
         run: |
           git push HEAD:main
           code=$?
