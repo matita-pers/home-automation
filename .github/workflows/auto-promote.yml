@@ -42,13 +42,13 @@ jobs:
           # Find open PRs with this HEAD SHA
           prs=$(gh api repos/${{ github.repository }}/pulls --jq ".[] | select(.head.sha == \"$sha\") | .number")
 
-          if [ -z "prs" ]; then
+          if [ -z "$prs" ]; then
             echo "::error::No open PR found with deployment SHA $sha"
             exit 1
           fi
 
           # Get the first matching PR
-          number=$(echo "prs" | head -n 1)
+          number=$(echo "$prs" | head -n 1)
 
           echo "pr_number=$number" >> $GITHUB_OUTPUT
           echo "head_sha=$sha" >> $GITHUB_OUTPUT
