@@ -50,14 +50,14 @@ async function login(username, password) {
     }
 }
 
-async function registerUser(username, password) {
+async function registerUser(username, password, isAdmin = false) {
     try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/admin/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, admin: isAdmin })
         });
 
         const data = await response.json();
@@ -81,28 +81,7 @@ async function logout() {
         console.error('Logout error:', error);
     }
     clearCache();
-    window.location.href = 'login.html';
-}
-
-// Update navbar based on login state
-async function updateNavbar() {
-    const navRight = document.getElementById('navRight');
-    if (!navRight) return;
-
-    const user = await getCurrentUser();
-
-    if (user) {
-        let html = `<span class="username">${user.username}</span>`;
-        
-        if (user.isAdmin) {
-            html += `<a href="registration.html" class="btn">Register User</a>`;
-        }
-        
-        html += `<button class="btn btn-logout" onclick="logout()">Logout</button>`;
-        navRight.innerHTML = html;
-    } else {
-        navRight.innerHTML = `<a href="login.html" class="btn">Login</a>`;
-    }
+    window.location.href = '/login';
 }
 
 // Check if user is logged in
@@ -120,13 +99,13 @@ async function isAdmin() {
 // Redirect to login if not authenticated
 async function requireAuth() {
     if (!(await isLoggedIn())) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     }
 }
 
 // Redirect to home if not admin
 async function requireAdmin() {
     if (!(await isAdmin())) {
-        window.location.href = 'index.html';
+        window.location.href = '/';
     }
 }
