@@ -3,7 +3,7 @@ name: Auto Promote auto/* PRs
 on:
   deployment_status:
     types: [success]
-    environment: Preview
+    # environment: Preview
 
 permissions:
   contents: write
