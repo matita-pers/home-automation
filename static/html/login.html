@@ -8,14 +8,7 @@
     <script src="../js/config.js"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="index.html" class="site-title"><h1 id="siteTitle">Home Automation</h1></a>
-        </div>
-        <div class="nav-right" id="navRight">
-            <!-- Will be populated by JavaScript -->
-        </div>
-    </nav>
+    <nav class="navbar"></nav>
 
     <main class="main-content">
         <div class="auth-container">
@@ -39,29 +32,7 @@
     </main>
 
     <script src="../js/auth.js"></script>
-    <script>
-        function togglePasswordVisibility(inputId) {
-            const input = document.getElementById(inputId);
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('siteTitle').textContent = SITE_TITLE;
-            updateNavbar();
-            
-            document.getElementById('loginForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                const result = await login(username, password);
-                if (result.success) {
-                    window.location.href = 'index.html';
-                } else {
-                    document.getElementById('loginError').textContent = result.message || 'Login failed';
-                }
-            });
-        });
-    </script>
+    <script src="../js/login.js"></script>
+    <script src="../js/main.js"></script>
 </body>
 </html>
