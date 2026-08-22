@@ -150,7 +150,7 @@ jobs:
       - id: rebase
         name: Rebase PR
         run: |
-          git push HEAD:main
+          git push origin HEAD:main
           code=$?
           if [ $code -ne 0 ]; then
             echo "::error::push failed, ensure the branch is up to date"
