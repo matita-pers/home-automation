@@ -29,14 +29,17 @@ def register():
 @bp.route("/devices")
 @login.require_admin
 def get_devices():
-    return "[]"
+    return "[{\"info\":\"unimplemented\"}]"
 
 @bp.route("/users")
 @login.require_admin
 def get_users():
-    return db.list_users()
+    return [
+        { "id": u.id, "username": u.username, "admin": u.admin }
+        for u in db.list_users()
+        ]
 
-@bp.route("/users/<int:user>/rename", methods=["POST"])
+@bp.route("/user/<int:user>/rename", methods=["POST"])
 @login.require_admin
 def rename_user(user: int):
     if request.get_json() is None:

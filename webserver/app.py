@@ -37,21 +37,7 @@ def _get_homepage():
 def _get_site_urls():
     return [x.rule for x in app.url_map.iter_rules()]
 
-@app.route("/admin/<path:path>")
-def _serve_static_admin_file(path):
-    if path.endswith(".html"):
-        return app.send_static_file("html/admin" + path)
-    return app.send_static_file(path)
-
-@app.route("/users/<path:path>")
-@login.require_login
-def _serve_static_user_file(path):
-    if path.endswith(".html"):
-        return app.send_static_file("html/users" + path)
-    return app.send_static_file(path)
-
-@app.route("/<path:path>")
-def _serve_static_file(path: str):
+def _serve_file(path):
     file = path.split("/")[-1]
     ext = file.split(".")[-1]
     if file == "":
@@ -60,6 +46,23 @@ def _serve_static_file(path: str):
         ext = "html"
         path += ".html"
 
-    if ext.lower() == "html":
-        return app.send_static_file("html/" + path)
-    return app.send_static_file(path)
+    try:
+        if ext.lower() == "html":
+            return app.send_static_file("html/" + path)
+        return app.send_static_file(path)
+    except:
+        return send_404()
+
+@app.route("/admin/<path:path>")
+@login.require_admin
+def _serve_static_admin_file(path):
+    return _serve_file("admin/" + path)
+
+@app.route("/users/<path:path>")
+@login.require_login
+def _serve_static_user_file(path):
+    return _serve_file("users/" + path)
+
+@app.route("/<path:path>")
+def _serve_static_file(path: str):
+    return _serve_file(path)
