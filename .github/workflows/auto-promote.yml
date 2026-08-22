@@ -2,8 +2,6 @@ name: Auto Promote auto/* PRs
 
 on:
   deployment_status:
-    types: [success]
-    # environment: Preview
 
 permissions:
   contents: write
@@ -14,6 +12,7 @@ jobs:
   login-app:
     name: Login the GitHub App
     runs-on: ubuntu-latest
+    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
     outputs:
       token: ${{ steps.login.outputs.token }}
     steps:
@@ -27,6 +26,7 @@ jobs:
   find-pr:
     name: Find Associated PR
     runs-on: ubuntu-latest
+    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
     outputs:
       pr_number: ${{ steps.find-pr.outputs.pr_number }}
       head_sha: ${{ steps.find-pr.outputs.head_sha }}
@@ -54,23 +54,30 @@ jobs:
           echo "${{ github.event.deployment }}"
 
   check-pr:
+    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
     needs:
-      - login-app
+      # - login-app
       - find-pr
     env:
-      GH_TOKEN: ${{ needs.login-app.outputs.token }}
+      #GH_TOKEN: ${{ needs.login-app.outputs.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
       COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     runs-on: ubuntu-latest
     steps:
-      - id: setup-git
+      - id: check-draft
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          draft=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.draft')
+          case "$draft" in
+            false) ;;
+            *)
+              echo "::error::the pr is in draft state"
+              exit 1
+              ;;
+          esac
 
       - id: check-author
         run: |
-          author=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -- jq '.user.id')
+          author=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.user.id')
           echo "PR author: $author"
           case "$author" in
             155455608) ;;
@@ -82,7 +89,7 @@ jobs:
 
       - id: check-base
         run: |
-          base=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -- jq '.base.ref')
+          base=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.base.ref')
           echo "base branch: $base"
           case "$base" in
             main) ;;
@@ -94,7 +101,7 @@ jobs:
 
       - id: check-head
         run: |
-          head=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -- jq '.base.ref')
+          head=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.base.ref')
           echo "head branch: $head"
           case "$head" in
             auto/*) ;; # created by push hook on main
@@ -104,3 +111,28 @@ jobs:
               exit 1
               ;;
           esac
+
+  rebase:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
+    needs:
+      - check-pr
+      - find-pr
+    env:
+      PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
+      COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
+    steps:
+      - id: setup-git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - uses: actions/checkout@v7
+
+      - id: rebase
+        run: |
+          git push HEAD:main
+          code=$?
+          if [ $code -ne 0 ]; then
+            echo "::error::push failed, ensure the branch is up to date"
+          fi
