@@ -1,6 +1,8 @@
 from flask import Flask
 import os
 
+IS_VERCEL = os.environ.get("VERCEL") is not None
+
 from . import login, admin
 from .utils import send_404
 
@@ -21,9 +23,10 @@ def _page_not_found(e):
 def _health():
     return "{\"code\":200,\"status\":\"ok\"}", 200
 
-@app.route("/")
-def _get_homepage():
-    return app.send_static_file("html/index.html")
+if not IS_VERCEL:
+    @app.route("/")
+    def _get_homepage():
+        return app.send_static_file("html/index.html")
 
 @app.route("/site-urls")
 @login.require_admin
@@ -56,6 +59,7 @@ def _serve_static_admin_file(path):
 def _serve_static_user_file(path):
     return _serve_file("users/" + path)
 
-@app.route("/<path:path>")
-def _serve_static_file(path: str):
-    return _serve_file(path)
+if not IS_VERCEL:
+    @app.route("/<path:path>")
+    def _serve_static_file(path: str):
+        return _serve_file(path)
