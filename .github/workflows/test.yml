@@ -1,5 +1,7 @@
 name: test.yml
 on:
+  # placeholder
+  workflow_dispatch:
 #  deployment:
 #  deployment_status:
 
