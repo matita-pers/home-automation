@@ -9,5 +9,11 @@ cd public/ || exit 4
 mv html/*.html .
 rm -rf html/
 cd ..
-echo done.
-ls -r public/
+echo Prepared field correctly
+
+mkdir -p .vercel/output/static
+cp -r public/* .vercel/output/static/
+
+echo files configured to be served from CDN:
+ls -lAr .vercel/output/static/
+echo end
