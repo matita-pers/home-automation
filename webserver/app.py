@@ -1,16 +1,17 @@
-from flask import Flask
+from flask import Flask, request
 import os
 
 IS_VERCEL = os.environ.get("VERCEL") is not None and False
 
 from . import login, admin
-from .utils import send_404
+from .utils import send_404, cache, cache_public
 
 app = Flask(__name__, static_folder="../static")
 
 app.secret_key = os.environ.get("SECRET_KEY")
 app.config['session.permanent'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = 60 * 60 * 24 * 7 # a week
+app.config['SESSION_COOKIE_NAME'] = 'session'
 
 login.load(app)
 admin.load(app)
@@ -51,15 +52,18 @@ def _serve_file(path):
 
 @app.route("/admin/<path:path>")
 @login.require_admin
+@cache
 def _serve_static_admin_file(path):
     return _serve_file("admin/" + path)
 
 @app.route("/users/<path:path>")
 @login.require_login
+@cache
 def _serve_static_user_file(path):
     return _serve_file("users/" + path)
 
 if not IS_VERCEL:
     @app.route("/<path:path>")
+    @cache_public
     def _serve_static_file(path: str):
         return _serve_file(path)
