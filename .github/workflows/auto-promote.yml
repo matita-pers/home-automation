@@ -194,7 +194,7 @@ jobs:
           git config --global user.email '$appid+$appname@users.noreply.github.com'
           gh auth setup-git
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.login.outputs.token }}
           appname: ${{ steps.login.outputs.app-slug }}[bot]
 
       - uses: actions/checkout@v7
