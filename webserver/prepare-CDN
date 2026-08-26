@@ -16,9 +16,9 @@ mv public/* .vercel/output/static/
 
 # enable CDN serving of static files
 cat >.vercel/output/config.json <<EOF
-'{'
- '"version": 3'
-'}'
+{
+ "version": 3
+}
 EOF
 
 echo files configured to be served from CDN:
