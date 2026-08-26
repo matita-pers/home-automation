@@ -11,11 +11,16 @@ rm -rf html/
 cd ..
 echo Prepared field correctly
 
-mkdir -p /.vercel/output/static
-mv public/ /.vercel/output/static/
+mkdir -p .vercel/output/static
+mv public/* .vercel/output/static/
+
+# enable CDN serving of static files
+cat >.vercel/output/config.json <<EOF
+'{'
+ '"version": 3'
+'}'
+EOF
 
 echo files configured to be served from CDN:
-ls -lAR /.vercel/output/
-echo config:
-cat /.vercel/output/config.json
+ls -lAR .vercel/output/
 echo end
