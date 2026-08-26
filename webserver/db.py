@@ -1,7 +1,10 @@
 import os
-from typing import Any, Generator
+from typing import Any
+from contextlib import contextmanager
+from collections.abc import Iterator
 
 from psycopg2 import pool as dbp, errors as dberrs
+from psycopg2.extensions import cursor
 import psycopg2
 from .models import User
 
@@ -11,7 +14,8 @@ if DB_URL is None or DB_URL == "":
     raise Exception("DATABASE_URL is not set")
 
 _db_pool = None
-def _get_cur() -> Generator:
+@contextmanager
+def _get_cur() -> Iterator[cursor]:
     global _db_pool
     if _db_pool is None:
         _db_pool = dbp.SimpleConnectionPool(1, 2, DB_URL)
@@ -25,6 +29,7 @@ def _get_cur() -> Generator:
     finally:
         _db_pool.putconn(__conn)
 
+
 def _query(query: str) -> tuple[Any, ...] | None:
     with _get_cur() as cur:
         cur.execute(query)
@@ -37,7 +42,7 @@ def _query_all(query: str) -> list[tuple[Any, ...]] | None:
 
 def execute_query(query: str) -> int:
     try:
-        with _get_cur as cur:
+        with _get_cur() as cur:
             cur.execute(query)
             return cur.fetchone()[0]
     except dberrs.ForeignKeyViolation:
