@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Generator
 
 from psycopg2 import pool as dbp, errors as dberrs
 import psycopg2
@@ -10,34 +10,39 @@ DB_URL = os.environ.get("DATABASE_URL")
 if DB_URL is None or DB_URL == "":
     raise Exception("DATABASE_URL is not set")
 
-try:
-    db_pool = dbp.SimpleConnectionPool(1, 2, DB_URL)
-except Exception as e:
-    print(f"Failed to create pool ({type(e)}): {e}")
-    db_pool = None
+_db_pool = None
+def _get_cur() -> Generator:
+    global _db_pool
+    if _db_pool is None:
+        _db_pool = dbp.SimpleConnectionPool(1, 2, DB_URL)
+    __conn = _db_pool.getconn()
+    try:
+        yield __conn.cursor()
+        __conn.commit()
+    except Exception:
+        __conn.rollback()
+        raise
+    finally:
+        _db_pool.putconn(__conn)
 
-conn = db_pool.getconn()
 def _query(query: str) -> tuple[Any, ...] | None:
-    with conn.cursor() as cur:
+    with _get_cur() as cur:
         cur.execute(query)
         return cur.fetchone()
 
 def _query_all(query: str) -> list[tuple[Any, ...]] | None:
-    with conn.cursor() as cur:
+    with _get_cur() as cur:
         cur.execute(query)
         return cur.fetchall()
 
 def execute_query(query: str) -> int:
     try:
-        with conn.cursor() as cur:
+        with _get_cur as cur:
             cur.execute(query)
-            conn.commit()
             return cur.fetchone()[0]
     except dberrs.ForeignKeyViolation:
-        conn.rollback()
         return -2
     except psycopg2.IntegrityError:
-        conn.rollback()
         return -1
 
 def get_user_info(username: str) -> User | None:
