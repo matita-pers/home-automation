@@ -8,6 +8,6 @@ cp -r -t public/ static/*
 cd public/ || exit 4
 mv html/*.html .
 rm -rf html/
+cd ..
 echo done.
-echo files copied
 ls -r public/
