@@ -153,13 +153,13 @@ jobs:
         # if only non-site-related files are modified, this is useless
         if: ${{ needs.find-pr.outputs.deployed == 'true' }}
         run: |
-          local code=0
+          code=0
           
           check-url() {
             curl -sSLf -o /dev/null \
               -H "x-vercel-protection-bypass: $BYPASS_SECRET" \
               $BURL$@
-            local ccode=$?
+            ccode=$?
             if [ $ccode -ne 0 ]; then
               code=$ccode
             fi
