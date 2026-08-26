@@ -1,2 +1,5 @@
 [tool.vercel]
 entrypoint = "webserver.app:app"
+
+[tool.vercel.scripts]
+build = "webserver/prepare-CDN"

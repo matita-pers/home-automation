@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" || exit 3
+cd ..
+
+mkdir public
+cp -r -t public/ static/*
+cd public/ || exit 4
+mv html/*.html .
+rm -rf html/
