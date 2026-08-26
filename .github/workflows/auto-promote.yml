@@ -27,6 +27,7 @@ jobs:
       pr_found: ${{ steps.find-pr.outputs.found }}
       pr_number: ${{ steps.find-pr.outputs.pr_number }}
       head_sha: ${{ steps.find-pr.outputs.head_sha }}
+      deployed: ${{ steps.find-pr-deployement.outputs.deployement }}
     steps:
       - name: Find PR from deployment
         id: find-pr-deployement
@@ -147,7 +148,7 @@ jobs:
       - id: check-site
         name: Check if site is working fine
         # if only non-site-related files are modified, this is useless
-        if: ${{ github.event == 'deployment_status' }}
+        if: ${{ needs.find-pr.outputs.deployed == 'true' }}
         run: |
           local code=0
           
