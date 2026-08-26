@@ -3,7 +3,7 @@ from typing import Any
 
 from psycopg2 import pool as dbp, errors as dberrs
 import psycopg2
-from models import User
+from .models import User
 
 DB_URL = os.environ.get("DATABASE_URL")
 

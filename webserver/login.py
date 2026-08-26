@@ -3,8 +3,8 @@ from flask import request, session
 from flask import redirect, jsonify
 import functools
 
-import db
-from utils import username_re
+from . import db
+from .utils import username_re
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 

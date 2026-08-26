@@ -1,12 +1,8 @@
 from flask import Flask
-from pathlib import Path
-import os, sys
+import os
 
-import login, admin
-from utils import send_404
-
-# force this file dir into the module search path
-sys.path.append(str(Path(__file__).resolve().parent))
+from . import login, admin
+from .utils import send_404
 
 app = Flask(__name__, static_folder="../static")
 

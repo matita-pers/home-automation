@@ -1,7 +1,7 @@
 from flask import Blueprint, Flask, Response
 from flask import request
 
-import login, db, utils
+from . import login, db, utils
 
 bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
