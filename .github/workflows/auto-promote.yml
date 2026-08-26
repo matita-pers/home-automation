@@ -72,7 +72,7 @@ jobs:
           deployment: ${{ steps.find-pr-deployement.outputs.deployement }}
           numberd: ${{ steps.find-pr-deployement.outputs.pr_number }}
           found: ${{ steps.find-pr-deployement.outputs.found }}
-          numberc: ${{ steps.find-pr-comment.outputs.pr }}
+          numberc: ${{ steps.find-pr-comment.outputs.pr_number }}
 
   check-pr:
     runs-on: ubuntu-latest
