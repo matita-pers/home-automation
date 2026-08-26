@@ -4,7 +4,9 @@ on:
   deployment_status:
 # when vercel skips the deployment, the above trigger isn't fired
   issue_comment:
-    types: [ edited ]
+    types:
+      - created
+      - edited
 
 permissions:
   contents: write
