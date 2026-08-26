@@ -177,23 +177,29 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
     steps:
-      - id: setup-git
-        name: Setup git configs
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: '9' # 8 commits to rebase + 1 commit already present in main
-          persist-credentials: true
-
       - name: Login to GitHub App
         uses: actions/create-github-app-token@v3
         id: login
         with:
           client-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_KEY }}
+      
+      - name: Setup git credentials
+        id: setup-git
+        run: |
+          appid=$(gh api "/users/$appname" --jq .id)
+          git config --global user.name $appname
+          git config --global user.email '$appid+$appname@users.noreply.github.com'
+          gh auth setup-git
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          appname: ${{ steps.login.outputs.app-slug }}[bot]
+
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: '9' # 8 commits to rebase + 1 commit already present in main
+          persist-credentials: true
+          token: ${{ steps.login.outputs.token }}
 
       - id: rebase
         name: Rebase PR
