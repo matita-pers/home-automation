@@ -185,6 +185,7 @@ jobs:
 
       - uses: actions/checkout@v7
         with:
+          fetch-depth: '9' # 8 commits to rebase + 1 commit already present in main
           persist-credentials: true
 
       - name: Login to GitHub App
