@@ -2,28 +2,37 @@ name: Auto Promote auto/ & feat/ PRs
 
 on:
   deployment_status:
+# when vercel skips the deployment, the above trigger isn't fired
+  issue_comment:
+    types: [ created ]
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
   deployments: read
 
 jobs:
   find-pr:
     name: Find Associated PR
     runs-on: ubuntu-latest
-    # skipped deployments are the ones that have changes in non-site related files
-    if: ${{ github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'skipped'}}
+    if: >- 
+      ${{
+        (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success')
+        || (github.event_name == 'issue_comment' && github.event.comment.user.id == 35613825 
+            && github.event.issue.pull_request && contains(github.event.comment.body, 'Skipped Deployment'))
+      }}
     outputs:
       pr_found: ${{ steps.find-pr.outputs.found }}
       pr_number: ${{ steps.find-pr.outputs.pr_number }}
       head_sha: ${{ steps.find-pr.outputs.head_sha }}
     steps:
-      - name: Find PR for deployment
-        id: find-pr
+      - name: Find PR from deployment
+        id: find-pr-deployement
+        if: github.event_name == 'deployment_status'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          echo "deployement=true" >> $GITHUB_OUTPUT
           sha="${{ github.event.deployment.sha }}"
           echo "Finding PR for deployment SHA: $sha, environment: ${{ github.event.deployment.environment }}"
 
@@ -41,20 +50,38 @@ jobs:
 
           echo "found=true" >> $GITHUB_OUTPUT
           echo "pr_number=$number" >> $GITHUB_OUTPUT
-          echo "head_sha=$sha" >> $GITHUB_OUTPUT
-          echo "Found PR #$number for deployment"
-          echo "${{ github.event.deployment }}"
+          echo "Found PR #$number for deployment ${{ github.event.deployment }}"
+
+      - name: Find PR from comment
+        id: find-pr-comment
+        if: github.event_name == 'issue_comment'
+        run: |
+          echo "pr_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+
+      - name: Get data from correct step
+        id: find-pr
+        run: |
+          if [ -n "$deployment" ]; then
+            echo "found=$found" >> $GITHUB_OUTPUT
+            echo "pr_number=$number-d" >> $GITHUB_OUTPUT
+          else
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$number-c" >> $GITHUB_OUTPUT
+          fi
+        env:
+          deployment: ${{ steps.find-pr-deployment.outputs.deployement }}
+          number-d: ${{ steps.find-pr-deployment.outputs.pr_number }}
+          found: ${{ steps.find-pr-deployment.outputs.found }}}
+          number-c: ${{ steps.find-pr-comment.outputs.pr }}
 
   check-pr:
     runs-on: ubuntu-latest
     needs:
-      # - login-app
       - find-pr
     if: ${{ needs.find-pr.outputs.pr_found }}
     env:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
-      COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     steps:
       - name: Login to GitHub App
         uses: actions/create-github-app-token@v3
@@ -117,8 +144,8 @@ jobs:
 
       - id: check-site
         name: Check if site is working fine
-        # if only non-site related files are modified, this is useless
-        if: ${{ github.event.deployment_status.state == 'success' }}
+        # if only non-site-related files are modified, this is useless
+        if: ${{ github.event == 'deployment_status' }}
         run: |
           local code=0
           
@@ -149,7 +176,6 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
-      COMMIT_SHA: ${{ needs.login-app.outputs.head_sha }}
     steps:
       - id: setup-git
         name: Setup git configs
