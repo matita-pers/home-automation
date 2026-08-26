@@ -1,7 +1,7 @@
 from flask import Blueprint, Flask, Response
 from flask import request
 
-from webserver import login, db
+import login, db, utils
 
 bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -20,11 +20,14 @@ def register():
     if username is None or username == "" or password is None or password == "":
         return Response("{\"success\":false, \"code\":422,\"message\":\"missing username/password\"}", "422 Registration failed")
 
-    id = db.create_user(username, password, admin if admin is not None else False)
-    if id < 0:
+    if utils.username_re.match(username) is None:
+        return Response("{\"success\":false, \"code\":422,\"message\":\"invalid username\"}", "422 Registration failed")
+
+    uid = db.create_user(username, password, admin if admin is not None else False)
+    if uid < 0:
         return Response("{\"success\":false, \"code\":422,\"message\":\"duplicate prevented\"}","422 Registration failed")
 
-    return {"success": "true", "id": id}
+    return {"success": "true", "id": uid}
 
 @bp.route("/devices")
 @login.require_admin

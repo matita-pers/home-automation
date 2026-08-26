@@ -1,8 +1,10 @@
 from flask import Flask, Response, Blueprint
 from flask import request, session
-from flask import redirect, url_for, jsonify
-import db
+from flask import redirect, jsonify
 import functools
+
+import db
+from utils import username_re
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
@@ -15,7 +17,7 @@ def require_login(f):
         if session.get("logged_in"):
             return f(*args, **kwargs)
 
-        return redirect(url_for("login", redirect_to=request.url))
+        return redirect("/login?redirect_to=" + request.url)
     return decorate
 
 def require_admin(f):
@@ -42,28 +44,32 @@ def get_session():
         })
     return jsonify({"success": False})
 
+_login_err = Response("{\"success\":false, \"code\":403,\"message\":\"wrong username/password\"}", "403 Login failed")
 @bp.route('/login', methods=['POST'])
 def login():
     if session.get("logged_in"):
         return Response("{\"success\":false, \"code\":441,\"message\":\"already logged in\"}", "441 Already logged in")
 
     if request.get_json() is None:
-        return Response("{\"success\":false, \"code\":422,\"message\":\"missing username/password\"}", "422 Empty data")
+        return _login_err
 
     username = request.get_json()["username"]
     password = request.get_json()["password"]
     if username is None or username == "" or password is None or password == "":
-        return Response("{\"success\":false, \"code\":403,\"message\":\"missing username/password\"}", "403 Login failed")
+        return _login_err
+
+    if username_re.match(username) is None:
+        return _login_err
 
     user = db.get_user_info(username)
     if user is None or user.id < 0:
         # sending "username/password" instead of only "username" to block attempts to guess usernames
-        return Response("{\"success\":false, \"code\":403,\"message\":\"wrong username/password\"}", "403 Login failed")
+        return _login_err
 
     # TODO: store hashed passwords
     if not user.password == password:
         print(f"user {user.username} ({user.id}) failed login: {password} != {user.password}")
-        return Response("{\"success\":false, \"code\":403,\"message\":\"wrong username/password\"}", "403 Login failed")
+        return _login_err
 
     session["logged_in"] = True
     session["userid"] = user.id
@@ -71,7 +77,7 @@ def login():
     session["admin"] = user.admin
     return Response("{\"success\":true, \"code\":200,\"message\":\"login successful\"}", "200 Login successful")
 
-@bp.route('/change-password', methods=['POST'])
+@bp.route('/change-password', methods=['GET', 'POST'])
 @require_login
 def change_password():
     if request.get_json() is None:

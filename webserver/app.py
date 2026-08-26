@@ -1,7 +1,9 @@
-from flask import Flask, session, request
-import os, sys
+from flask import Flask
 from pathlib import Path
+import os, sys
+
 import login, admin
+from utils import send_404
 
 # force this file dir into the module search path
 sys.path.append(str(Path(__file__).resolve().parent))
@@ -14,11 +16,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 60 * 60 * 24 * 7 # a week
 
 login.load(app)
 admin.load(app)
-
-def send_404():
-    if request.path.startswith("/api/"):
-        return {"code": 404, "status": "not found", "message": "not found"}, 404
-    return app.send_static_file("html/404.html"), 404
 
 @app.errorhandler(404)
 def _page_not_found(e):
