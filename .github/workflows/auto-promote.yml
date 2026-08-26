@@ -85,6 +85,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ needs.find-pr.outputs.pr_number }}
+    outputs:
+      ref: ${{ steps.check-head.outputs.ref }}
     steps:
       - name: Login to GitHub App
         uses: actions/create-github-app-token@v3
@@ -136,6 +138,7 @@ jobs:
         run: |
           head=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.head.ref')
           echo "head branch: $head"
+          echo "ref=$head" >> $GITHUB_OUTPUT
           case "$head" in
             auto/*) ;; # created by push hook on main
             feat/*) ;;
@@ -202,6 +205,7 @@ jobs:
         with:
           fetch-depth: '9' # 8 commits to rebase + 1 commit already present in main
           persist-credentials: true
+          ref: ${{ needs.check-pr.outputs.ref }}
           token: ${{ steps.login.outputs.token }}
 
       - id: rebase
