@@ -50,7 +50,7 @@ jobs:
 
           echo "found=true" >> $GITHUB_OUTPUT
           echo "pr_number=$number" >> $GITHUB_OUTPUT
-          echo "Found PR #$number for deployment ${{ github.event.deployment }}"
+          echo "Found PR #$number for deployment"
 
       - name: Find PR from comment
         id: find-pr-comment
@@ -63,16 +63,16 @@ jobs:
         run: |
           if [ -n "$deployment" ]; then
             echo "found=$found" >> $GITHUB_OUTPUT
-            echo "pr_number=$number-d" >> $GITHUB_OUTPUT
+            echo "pr_number=$numberd" >> $GITHUB_OUTPUT
           else
             echo "found=true" >> $GITHUB_OUTPUT
-            echo "pr_number=$number-c" >> $GITHUB_OUTPUT
+            echo "pr_number=$numberc" >> $GITHUB_OUTPUT
           fi
         env:
-          deployment: ${{ steps.find-pr-deployment.outputs.deployement }}
-          number-d: ${{ steps.find-pr-deployment.outputs.pr_number }}
-          found: ${{ steps.find-pr-deployment.outputs.found }}}
-          number-c: ${{ steps.find-pr-comment.outputs.pr }}
+          deployment: ${{ steps.find-pr-deployement.outputs.deployement }}
+          numberd: ${{ steps.find-pr-deployement.outputs.pr_number }}
+          found: ${{ steps.find-pr-deployement.outputs.found }}
+          numberc: ${{ steps.find-pr-comment.outputs.pr }}
 
   check-pr:
     runs-on: ubuntu-latest
