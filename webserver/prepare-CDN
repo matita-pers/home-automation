@@ -12,7 +12,7 @@ cd ..
 echo Prepared field correctly
 
 mkdir -p .vercel/output/static
-cp public/* .vercel/output/static/
+cp -r public/* .vercel/output/static/
 
 # enable CDN serving of static files
 cat >.vercel/output/config.json <<EOF
