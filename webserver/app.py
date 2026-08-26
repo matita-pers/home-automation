@@ -1,7 +1,7 @@
 from flask import Flask
 import os
 
-IS_VERCEL = os.environ.get("VERCEL") is not None
+IS_VERCEL = os.environ.get("VERCEL") is not None and False
 
 from . import login, admin
 from .utils import send_404
