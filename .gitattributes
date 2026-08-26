@@ -1,14 +1,6 @@
+# .ino files are cpp basically
 *.ino  text diff=cpp eol=lf
-*.h    text eol=lf
-*.cpp  text eol=lf
-*.example text eol=lf
 *.h.example text diff=cpp eol=lf
-*.py text diff=py eol=lf
 
-*.js diff=js text eol=lf
-*.css text eol=lf
-*.html text eol=lf
-*.git* text eol=lf
-vercel.json text eol=lf
-.vercelignore text eol=lf
-*.tml text eol=lf
+# make every file use lf by default
+* text eol=lf
