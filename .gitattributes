@@ -1,6 +1,5 @@
 # .ino files are cpp basically
 *.ino  text diff=cpp eol=lf
-*.h.example text diff=cpp eol=lf
 
 # make every file use lf by default
 * text eol=lf

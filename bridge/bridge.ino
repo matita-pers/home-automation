@@ -3,26 +3,12 @@
 #include <Preferences.h>
 #include <HTTPClient.h>
 
+#define VERSION "0.0.1"
+//#define PROD false
+
 #include "config.h"
-
-// check that config.h is configured properly
-#ifndef MAX_401_RETRIES
-#error "MAX_401_RETRIES not defined"
-#elif MAX_401_RETRIES <= 0
-#error "MAX_401_RETRIES must be greater than 0"
-#endif
-
-#ifndef DEVICE_ID
-#error "DEVICE_ID not defined"
-#else
-static_assert(sizeof(DEVICE_ID) > 1, "DEVICE_ID cannot be empty");
-#endif
-
-#ifndef SERVER_URL
-#error "SERVER_URL not defined"
-#else
-static_assert(sizeof(SERVER_URL) > 1, "SERVER_URL cannot be empty");
-#endif
+// compile-time checks of configs are here
+#include "preconditions.h"
 
 Preferences prefs;
 WebServer server(80);
@@ -31,66 +17,62 @@ String ssid;
 String password;
 String token;
 
+const String url = SERVER_URL "/internal/device/" DEVICE_ID "/bulk";
+
 bool isAPMode = false;
 int unauthCount = 0;
 
-const char* AP_SSID = "ESP32_Config_AP";
-
-void handleRoot() {
+void setupPage() {
     String html = "<!DOCTYPE html><html><body style='font-family:sans-serif;'>";
     html += "<h2>ESP32 Network & Auth Setup</h2>";
+    html += "<p>Device id: <b>" DEVICE_ID "</b></p>";
     html += "<form method='POST' action='/save'>";
     html += "<label>WiFi SSID:</label><br>";
-    html += "<input type='text' name='ssid' required><br><br>";
+    html += "<input type='text' name='ssid' default='" + ssid + "' required><br><br>";
     html += "<label>WiFi Password:</label><br>";
-    html += "<input type='password' name='password'><br><br>";
+    html += "<input type='text' name='password' default='" + password + "' ><br><br>";
     html += "<label>Auth Token:</label><br>";
-    html += "<input type='text' name='token' required><br><br>";
+    html += "<input type='text' name='token' default='" + token + "' required><br><br>";
     html += "<input type='submit' value='Save & Connect'>";
     html += "</form></body></html>";
-    
+
     server.send(200, "text/html", html);
 }
 
 void handleSave() {
-    if (server.hasArg("ssid") && server.hasArg("token")) {
-        ssid = server.arg("ssid");
-        password = server.arg("password");
-        token = server.arg("token");
-
-        // Save credentials to Flash (NVS)
-        prefs.begin("config", false);
-        prefs.putString("ssid", ssid);
-        prefs.putString("password", password);
-        prefs.putString("token", token);
-        prefs.end();
-
-        server.send(200, "text/html", "<h3>Saved! Restarting ESP32...</h3>");
-        
-        delay(1000);
-        ESP.restart(); // Reboot to apply and enter Station mode
-    } else {
+    if (!(server.hasArg("ssid") || server.hasArg("token"))) {
         server.send(400, "text/plain", "Error: Missing SSID or Token");
+        return;
     }
+    ssid = server.arg("ssid");
+    password = server.arg("password");
+    token = server.arg("token");
+
+    prefs.begin("config", false);
+    prefs.putString("ssid", ssid);
+    prefs.putString("password", password);
+    prefs.putString("token", token);
+    prefs.end();
+
+    server.send(200, "text/html", "<h3>Saved! Restarting ESP32...</h3>");
+
+    delay(1000);
+    ESP.restart(); // Reboot to apply and enter Station mode
 }
 
-// ------------------------------------------------------------------------------
-// Core Logic
-// ------------------------------------------------------------------------------
 void startAPMode() {
     isAPMode = true;
     WiFi.mode(WIFI_AP);
     WiFi.softAP(AP_SSID);
     
-    server.on("/", handleRoot);
+    server.on("/", setupPage);
     server.on("/save", HTTP_POST, handleSave);
     server.begin();
 }
 
 void setup() {
-    Serial.begin(115200);
-    delay(1000);
-
+    Serial.begin(9600);
+    
     // Read config from Flash
     // The 'true' parameter opens preferences in Read-Only mode
     prefs.begin("config", true);
@@ -99,70 +81,90 @@ void setup() {
     token = prefs.getString("token", "");
     prefs.end();
 
-    // Check if device is unconfigured
+    delay(250);
+
+    while (Serial.available())
+
     if (ssid == "" || token == "") {
         startAPMode();
-    } else {
-        // Attempt to connect to WiFi
-        WiFi.mode(WIFI_STA);
-        WiFi.begin(ssid.c_str(), password.c_str());
-        
-        int retries = 0;
-        while (WiFi.status() != WL_CONNECTED && retries < 20) {
-            delay(500);
-            retries++;
-        }
-
-        // If it fails to connect, fallback to AP mode so user can fix credentials
-        if (WiFi.status() != WL_CONNECTED) {
-            startAPMode();
-        }
+        Serial.println("wifi creds missing");
+        return;
     }
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid.c_str(), password.c_str());
+    WiFi.setAutoReconnect(true);
+    
+    //20 is an arbitrary large number
+    int retries = 0;
+    while (WiFi.status() != WL_CONNECTED && retries < 20) {
+        retries++;
+        //use increasing wait time. why? idk, a fixed one felt wrong
+        delay(500 * retries);
+        Serial.println("wifi not connected...");
+    }
+
+    // If it fails to connect after 20 tries, fallback to AP mode so user can fix credentials
+    if (WiFi.status() != WL_CONNECTED) {
+        startAPMode();
+        Serial.println("wifi creds wrong");
+    }
+
+    Serial.println("Starting...");
+    Serial.println("url=" + url);
+    Serial.println("sid=" + ssid);
+    Serial.println("pwd=" + password);
+    Serial.println("token=" + token);
 }
 
 void loop() {
     if (isAPMode) {
-        // Just serve the config page
         server.handleClient();
-    } else {
-        // Station Mode: Push telemetry data
-        if (WiFi.status() == WL_CONNECTED) {
-            HTTPClient http;
-            
-            // Build URL with DEVICE_ID as requested
-            String url = String(SERVER_URL) + DEVICE_ID;
-            
-            // 10 second timeout for Vercel cold starts
-            http.setTimeout(10000);
-            http.begin(url);
-            http.addHeader("Content-Type", "application/json");
-            http.addHeader("X-API-Key", token);
-
-            // TODO: Replace with real sensor reads
-            String payload = "{\"sensor_1\": 24.5, \"sensor_2\": 60.1}"; 
-            
-            int httpCode = http.POST(payload);
-
-            if (httpCode == 401) {
-                unauthCount++;
-                if (unauthCount >= MAX_401_RETRIES) {
-                    // Void the token in flash
-                    prefs.begin("config", false);
-                    prefs.remove("token"); 
-                    prefs.end();
-                    
-                    // Restart to trigger AP mode on next boot
-                    ESP.restart(); 
-                }
-            } else if (httpCode == 200 || httpCode == 201) {
-                // Reset counter on successful transmission
-                unauthCount = 0; 
-            }
-            
-            http.end();
-        }
-        
-        // Wait before next transmission
-        delay(5000); 
+        return;
     }
+
+    if (WiFi.status() != WL_CONNECTED) {
+        WiFi.reconnect();
+        Serial.print("WiFi: st:");
+        Serial.print(WiFi.status());
+        Serial.println("; manual reconneconnection");
+        delay(1000); // wait a second
+        return;
+    }
+    HTTPClient http;
+    
+    http.setTimeout(10000); //10s
+    http.begin(url);
+    http.addHeader("Content-Type", "text/plain");
+    http.addHeader("Authorization", "Basic: " DEVICE_ID " " + token);
+    http.setUserAgent("esp32bridge-" DEVICE_ID "/" VERSION);
+
+    // TODO: Replace with real sensor reads
+    String payload = "<example:1.4;time:15;sent:19;>"; 
+
+    int httpCode = http.POST(payload);
+    Serial.print("sent data, got: ");
+    Serial.println(httpCode);
+
+    if (MAX_401_RETRIES > 0) {
+        if (httpCode == 401 || httpCode == 404 || httpCode == 403) {
+            unauthCount++;
+            if (unauthCount >= MAX_401_RETRIES) {
+                // Void the token in flash
+                prefs.begin("config", false);
+                prefs.remove("token"); 
+                prefs.end();
+                
+                // Restart to trigger AP mode on next boot
+                ESP.restart();
+            }
+        } else if (httpCode >= 200 && httpCode < 300) {
+            // Reset counter on successful transmission
+            unauthCount = 0; 
+        }
+    }
+    
+    http.end();
+    
+    delay(WAIT_TIME);
 }
