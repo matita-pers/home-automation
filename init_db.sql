@@ -44,7 +44,7 @@ comment on column config.sensor.sensor_name is 'the human-readable name of this 
 
 /* auth schema */
 create schema if not exists auth;
-comment on schema auth is 'data for authourization is tored here (sessions/tokens/passwords)';
+comment on schema auth is 'data for authorization is stored here (sessions/tokens/passwords)';
 create table if not exists auth.user (
     id            serial not null,
     username      varchar(255)                                           not null,
