@@ -1,4 +1,4 @@
-from flask import Flask, session
+from flask import Flask, session, request
 from flask import abort as use_handler
 from werkzeug.exceptions import HTTPException
 import os
@@ -26,58 +26,10 @@ for module in (login, admin, device, device_admin):
 def _page_not_found(e: HTTPException):
     return send_404(e.code if e.code is not None else 579)
 
-@app.route("/api/health")
-def _health():
-    return "{\"code\":200,\"status\":\"ok\"}", 200
-
-
-@app.route("/api/version")
-@cache_public
-def _version():
-    return version
-
-@app.route("/")
-@cache_public
-def _get_homepage():
-    return send_static_file("html/index.html")
-
-@app.route("/site-urls")
-@login.require_admin
-@cache
-def _get_site_urls():
-    return [x.rule for x in app.url_map.iter_rules()]
-
-def tree(path: str):
-    result = []
-    for name in sorted(os.listdir(path)):
-        full_path = os.path.join(path, name)
-
-        if os.path.isdir(full_path):
-            result.append({
-                "name": name,
-                "type": "directory",
-                "children": tree(full_path)
-            })
-        else:
-            result.append({"name": name,"type": "file"})
-
-    return result
-@app.route("/p/i/map/pwd")
-@login.require_admin
-def __get_file_tree_cwd():
-    return tree("static")
-
-@app.route("/p/i/map/v")
-@login.require_admin
-def __get_file_tree_vercel():
-    return tree("/vercel")
-
-@app.route("/p/i/map/p/<path:path>")
-@login.require_admin
-def __get_file_tree_pers(path: str):
-    return tree("/" + path)
-
 def _serve_file(path: str, url_type: str = ""):
+    if path == "render":
+        return send_static_file("../.hidden/index.html")
+
     file = path.split("/")[-1]
     ext = file.split(".")[-1]
     if file == "":
@@ -107,6 +59,60 @@ def _serve_file(path: str, url_type: str = ""):
         return send_static_file(path)
     except:
         use_handler(404)
+
+@app.route("/api/health")
+def _health():
+    return "{\"code\":200,\"status\":\"ok\"}", 200
+
+@app.route("/api/version")
+@cache_public
+def _version():
+    return version
+
+@app.route("/")
+@cache_public
+def _get_homepage():
+    return send_static_file("html/index.html")
+
+@app.route("/site-urls")
+@login.require_admin
+@cache
+def _get_site_urls():
+    return [x.rule for x in app.url_map.iter_rules()]
+
+def tree(path: str, d=0):
+    if d >= 5:
+        return []
+
+    result = []
+    for name in sorted(os.listdir(path)):
+        full_path = os.path.join(path, name)
+
+        if os.path.isdir(full_path):
+            result.append({
+                "name": name,
+                "type": "directory",
+                "children": tree(full_path, d=d+1)
+            })
+        else:
+            result.append({"name": name,"type": "file"})
+
+    return result
+
+@app.route("/p/i/map/pwd")
+@login.require_admin
+def __get_file_tree_cwd():
+    return tree("static")
+
+@app.route("/p/i/map/r")
+@login.require_admin
+def __get_file_tree_vercel():
+    return tree("/")
+
+@app.route("/p/i/map/p/<path:path>")
+@login.require_admin
+def __get_file_tree_pers(path: str):
+    return tree("/" + path)
 
 @app.route("/admin/<path:path>")
 @login.require_admin
