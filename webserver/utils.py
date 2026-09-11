@@ -4,8 +4,8 @@ from typing import Any
 from json import dumps as jsonify
 import re, functools, os
 
-username_re = re.compile(r"^[a-zA-Z0-9.\\$_-]{4, 16}$")
-password_re = re.compile(r"^[a-zA-Z0-9.\\$!?@#&+:,;<>=àèéòçùì§\[\](){}€^_-]{6, 48}$")
+username_re = re.compile(r"^[a-zA-Z0-9.\\$_-]{4,16}$")
+password_re = re.compile(r"^[a-zA-Z0-9.\\$!?@#&+:,;<>=àèéòçùì§\[\](){}€^_-]{6,48}$")
 
 _STATIC_DIR = os.path.join(os.path.dirname(str(__file__)), "../static")
 def send_static_file(path: str):
