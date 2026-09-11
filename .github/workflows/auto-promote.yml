@@ -78,6 +78,7 @@ jobs:
           numberc: ${{ steps.find-pr-comment.outputs.pr_number }}
 
   check-pr:
+    name: Check PR eligibility & site health
     runs-on: ubuntu-latest
     needs:
       - find-pr
@@ -156,18 +157,31 @@ jobs:
           code=0
           
           check-url() {
-            curl -sSLf -o /dev/null \
+            curl -sSLf -o tmp.txt \
               -H "x-vercel-protection-bypass: $BYPASS_SECRET" \
               $BURL$@
             ccode=$?
             if [ $ccode -ne 0 ]; then
+              echo "::error::site is not working fine: $BURL$@"
+              echo "::group::response"
+              cat tmp.txt
+              echo "::endgroup::"
               code=$ccode
+            else
+              echo "::debug::endpoint is working fine: $BURL$@"
             fi
+            
+            if [ x$PRINT != x ]; then
+              cat tmp.txt
+            fi
+            
+            rm tmp.txt
           }
           
           check-url "/"
           # in the future static files will be managed by the CDN, so this is checking the vercel function directly
           check-url "/api/health"
+          PRINT=1 check-url "/api/version"
           
           exit $code
         env:
@@ -175,6 +189,7 @@ jobs:
           BYPASS_SECRET: ${{ secrets.VERCEL_BYPASS_SECRET }}
 
   rebase:
+    name: Rebase PR
     runs-on: ubuntu-latest
     needs:
       - check-pr
