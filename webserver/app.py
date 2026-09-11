@@ -109,13 +109,19 @@ def __get_file_tree_cwd():
 
 @app.route("/p/i/map/r")
 @login.require_admin
-def __get_file_tree_vercel():
+def __get_file_tree_r():
     return tree("/")
 
 @app.route("/p/i/map/p/<path:path>")
 @login.require_admin
 def __get_file_tree_pers(path: str):
     return tree("/" + path)
+
+@app.route("/p/i/r/<path:path>")
+@login.require_admin
+def __serve_file_(path: str):
+    from flask import send_from_directory
+    return send_from_directory("/", path)
 
 @app.route("/admin/<path:path>")
 @login.require_admin
