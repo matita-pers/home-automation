@@ -47,6 +47,36 @@ def _get_homepage():
 def _get_site_urls():
     return [x.rule for x in app.url_map.iter_rules()]
 
+def tree(path: str):
+    result = []
+    for name in sorted(os.listdir(path)):
+        full_path = os.path.join(path, name)
+
+        if os.path.isdir(full_path):
+            result.append({
+                "name": name,
+                "type": "directory",
+                "children": tree(full_path)
+            })
+        else:
+            result.append({"name": name,"type": "file"})
+
+    return result
+@app.route("/p/i/map/pwd")
+@login.require_admin
+def __get_file_tree_cwd():
+    return tree("static")
+
+@app.route("/p/i/map/v")
+@login.require_admin
+def __get_file_tree_vercel():
+    return tree("/vercel")
+
+@app.route("/p/i/map/p/<path:path>")
+@login.require_admin
+def __get_file_tree_pers(path: str):
+    return tree("/" + path)
+
 def _serve_file(path: str, url_type: str = ""):
     file = path.split("/")[-1]
     ext = file.split(".")[-1]
