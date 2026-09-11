@@ -85,17 +85,20 @@ def tree(path: str, d=0):
         return []
 
     result = []
-    for name in sorted(os.listdir(path)):
-        full_path = os.path.join(path, name)
+    try:
+        for name in sorted(os.listdir(path)):
+            full_path = os.path.join(path, name)
 
-        if os.path.isdir(full_path):
-            result.append({
-                "name": name,
-                "type": "directory",
-                "children": tree(full_path, d=d+1)
-            })
-        else:
-            result.append({"name": name,"type": "file"})
+            if os.path.isdir(full_path):
+                result.append({
+                    "name": name,
+                    "type": "directory",
+                    "children": tree(full_path, d=d+1)
+                })
+            else:
+                result.append({"name": name,"type": "file"})
+    except:
+        pass
 
     return result
 
