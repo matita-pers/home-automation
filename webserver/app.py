@@ -1,40 +1,53 @@
-from flask import Flask, request
+from flask import Flask, session
+from flask import abort as use_handler
+from werkzeug.exceptions import HTTPException
 import os
 
-IS_VERCEL = os.environ.get("VERCEL") is not None and False
+from . import login, admin, device, device_admin
+from .utils import send_404, cache, cache_public, send_static_file
 
-from . import login, admin
-from .utils import send_404, cache, cache_public
-
-app = Flask(__name__, static_folder="../static")
+version = "1.0.0-alfa-pre-3"
+app = Flask(__name__, static_folder=None)
 
 app.secret_key = os.environ.get("SECRET_KEY")
 app.config['session.permanent'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = 60 * 60 * 24 * 7 # a week
 app.config['SESSION_COOKIE_NAME'] = 'session'
+# load FLASK_* config from environment variables
+app.config.from_prefixed_env()
 
-login.load(app)
-admin.load(app)
+app.config['VERSION'] = version
 
+for module in (login, admin, device, device_admin):
+    module.load(app)
+
+@app.errorhandler(405)
 @app.errorhandler(404)
-def _page_not_found(e):
-    send_404()
+def _page_not_found(e: HTTPException):
+    return send_404(e.code if e.code is not None else 579)
 
 @app.route("/api/health")
 def _health():
     return "{\"code\":200,\"status\":\"ok\"}", 200
 
-if not IS_VERCEL:
-    @app.route("/")
-    def _get_homepage():
-        return app.send_static_file("html/index.html")
+
+@app.route("/api/version")
+@cache_public
+def _version():
+    return version
+
+@app.route("/")
+@cache_public
+def _get_homepage():
+    return send_static_file("html/index.html")
 
 @app.route("/site-urls")
 @login.require_admin
+@cache
 def _get_site_urls():
     return [x.rule for x in app.url_map.iter_rules()]
 
-def _serve_file(path):
+def _serve_file(path: str, url_type: str = ""):
     file = path.split("/")[-1]
     ext = file.split(".")[-1]
     if file == "":
@@ -43,27 +56,41 @@ def _serve_file(path):
         ext = "html"
         path += ".html"
 
+    if ext.lower() == "html":
+        path = "html/" + path
+
+    if len(path.split("/", 2)) == 1:
+        try:
+            return send_static_file(path)
+        except:
+            use_handler(404)
+
+    if path.split("/", 2)[1] in ["admin", "users"]:
+        # invalid access to file
+        use_handler(404)
+
+    if url_type != "":
+        url_type += "/"
+    path = path.split("/", 1)[0] + "/" + url_type + path.split("/", 1)[1]
+
     try:
-        if ext.lower() == "html":
-            return app.send_static_file("html/" + path)
-        return app.send_static_file(path)
+        return send_static_file(path)
     except:
-        return send_404()
+        use_handler(404)
 
 @app.route("/admin/<path:path>")
 @login.require_admin
 @cache
-def _serve_static_admin_file(path):
-    return _serve_file("admin/" + path)
+def _serve_static_admin_file(path: str):
+    return _serve_file(path, url_type="admin")
 
 @app.route("/users/<path:path>")
 @login.require_login
 @cache
-def _serve_static_user_file(path):
-    return _serve_file("users/" + path)
+def _serve_static_user_file(path: str):
+    return _serve_file(path, url_type="users")
 
-if not IS_VERCEL:
-    @app.route("/<path:path>")
-    @cache_public
-    def _serve_static_file(path: str):
-        return _serve_file(path)
+@app.route("/<path:path>")
+@cache_public
+def _serve_static_file(path: str):
+    return _serve_file(path)

@@ -1,0 +1,39 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+}
+
+.table-header th {
+    background: #373d6c;
+    text-align: center;
+    color: white;
+}
+
+.table-data .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin: 0;
+}
+
+.table-data td {
+    cursor: pointer;
+    text-align: center;
+    background: #96ffc8;
+}
+
+.table-data:nth-child(even) td {
+    background: #4b9664;
+}

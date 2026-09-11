@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Home Automation</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <script src="../js/config.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar"></nav>
+    <nav id="navbar"></nav>
 
     <main class="main-content">
         <div class="auth-container">
@@ -16,13 +15,13 @@
             <form id="loginForm" class="auth-form">
                 <div class="form-group">
                     <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password:</label>
                     <div class="password-input-container">
-                        <input type="password" id="password" name="password" required>
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password')">👁️</button>
+                        <input type="password" id="password" name="password" autocomplete="current-password" required>
+                        <button type="button" id="toggle" class="toggle-password">👁️</button>
                     </div>
                 </div>
                 <button type="submit" class="btn">Login</button>
@@ -31,8 +30,7 @@
         </div>
     </main>
 
-    <script src="../js/auth.js"></script>
-    <script src="../js/login.js"></script>
-    <script src="../js/main.js"></script>
+    <script type="module" src="/js/common.js"></script>
+    <script type="module" src="/js/login.js"></script>
 </body>
 </html>

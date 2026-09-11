@@ -1,28 +1,36 @@
-// Login page specific JavaScript
+import { getSession, post, refreshSession } from "/js/utils.js"
 
-function togglePasswordVisibility(inputId) {
-    const input = document.getElementById(inputId);
-    input.type = input.type === 'password' ? 'text' : 'password';
+const redirectTo = new URLSearchParams(window.location.search).get('redirect_to') || '/';
+
+async function handleLogin() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    const resp = await post('/api/auth/login', { username, password })
+    if (resp && resp.success) {
+        await refreshSession();
+        window.location.href = redirectTo;
+    } else {
+        document.getElementById('loginError').textContent = resp?.message || 'Login failed';
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectTo = urlParams.get('redirect_to');
-    
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        const result = await login(username, password);
-        if (result.success) {
-            if (redirectTo) {
-                window.location.href = redirectTo;
-            } else {
-                window.location.href = '/';
-            }
-        } else {
-            document.getElementById('loginError').textContent = result.message || 'Login failed';
+document.addEventListener('DOMContentLoaded', e => {
+    getSession().then(user => {
+        if (user) {
+            console.log('User is already logged in:', user);
+            console.log('Redirecting to:', redirectTo);
+            window.location.href = redirectTo;
         }
+    });
+
+    const input = document.getElementById("password");
+    document.getElementById('toggle').addEventListener('click', e => {
+        input.type = input.type === 'password' ? 'text' : 'password';
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', e => {
+        e.preventDefault();
+        handleLogin().catch(console.error);
     });
 });

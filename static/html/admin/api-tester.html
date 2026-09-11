@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester - Home Automation</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/admin/css/api-tester.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+
+    <main class="main-content">
+        <h2>API Tester</h2>
+        <div class="api-tester-container">
+            <form id="apiTesterForm">
+                <div class="form-group">
+                    <label for="method">Method:</label>
+                    <select id="method" name="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="path">Path (appended to hostname):</label>
+                    <input type="text" id="path" name="path" placeholder="/api/health" required>
+                </div>
+                <div class="form-group">
+                    <label for="body">Request Body (JSON, optional):</label>
+                    <textarea id="body" name="body" placeholder='{"key": "value"}'></textarea>
+                </div>
+                <button type="submit" class="btn">Send Request</button>
+            </form>
+
+            <div id="responseContainer" class="response-container">
+                <div id="statusCode" class="status-code"></div>
+                <h3>Response:</h3>
+                <pre id="responseBody"></pre>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="/js/common.js"></script>
+    <script type="module" src="/admin/js/api-tester.js"></script>
+</body>
+</html>

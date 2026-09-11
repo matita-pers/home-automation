@@ -4,25 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Home Automation</title>
-    <link rel="stylesheet" href="../../css/style.css">
-    <script src="../../js/config.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar"></nav>
+    <nav id="navbar"></nav>
 
     <main class="main-content">
         <h2>Admin Panel</h2>
-        <div style="margin-bottom: 1rem;">
-            <a href="/admin/users-panel" class="btn">Users Management Panel</a>
-        </div>
-        <div id="usersContainer">
-            <h3>Registered Users</h3>
-            <div id="usersList"></div>
+        <div class="btn-block">
+            <a href="/admin/users-panel" class="btn">Users Management </a>
+            <a href="/admin/api-tester" class="btn">API Tester </a>
+            <a href="/admin/registration" class="btn">Register New User </a>
         </div>
     </main>
 
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/admin.js"></script>
-    <script src="../../js/main.js"></script>
+    <script type="module" src="/js/common.js"></script>
 </body>
 </html>

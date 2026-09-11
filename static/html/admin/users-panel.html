@@ -4,29 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users Panel - Home Automation</title>
-    <link rel="stylesheet" href="../../css/style.css">
-    <script src="../../js/config.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/users/css/tables.css">
 </head>
 <body>
-    <nav class="navbar"></nav>
+    <nav id="navbar"></nav>
 
     <main class="main-content">
         <h2>Users Management Panel</h2>
         <div id="usersContainer">
-            <div id="usersList"></div>
+            <table id="usersTable">
+                <thead>
+                    <tr class="table-header">
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersList">
+                    <!-- Users will be dynamically added here -->
+                <tr class="table-data"> <td colspan="4" class="no-data">No users found.</td> </tr>
+                </tbody>
+            </table>
+            <button id="reloadUsers" class="btn">Reload users table</button>
         </div>
         
         <div class="auth-container" style="margin-top: 2rem;">
             <h3>Edit User</h3>
             <div style="margin-bottom: 1rem;">
                 <label for="loadUserId">Load User by ID:</label>
-                <input type="number" id="loadUserId" name="loadUserId" style="width: 100px; margin-left: 0.5rem;">
-                <button type="button" class="btn" onclick="loadUserById()" style="margin-left: 0.5rem;">Load</button>
+                <input type="number" id="loadUserId" name="loadUserId">
+                <button type="button" id="loadUserForEdit" class="btn">Load</button>
             </div>
             <form id="editUserForm" class="auth-form">
                 <div class="form-group">
                     <label for="editUserId">User ID:</label>
-                    <input type="number" id="editUserId" name="editUserId" required>
+                    <input type="number" id="editUserId" name="editUserId" required readonly>
                 </div>
                 <div class="form-group">
                     <label for="editUsername">Username:</label>
@@ -45,8 +59,7 @@
         </div>
     </main>
 
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/users-panel.js"></script>
-    <script src="../../js/main.js"></script>
+    <script type="module" src="/admin/js/users-panel.js"></script>
+    <script type="module" src="/js/common.js"></script>
 </body>
 </html>

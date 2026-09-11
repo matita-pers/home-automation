@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register User - Home Automation</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <script src="../js/config.js"></script>
+    <title>Create User - Home Automation</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar"></nav>
+    <nav id="navbar"></nav>
 
     <main class="main-content">
         <div class="auth-container">
@@ -16,15 +15,13 @@
             <form id="registerForm" class="auth-form">
                 <div class="form-group">
                     <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password:</label>
-                    <input type="text" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password:</label>
-                    <input type="text" id="confirmPassword" name="confirmPassword" required>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                    <button type="button" id="togglePassword" class="password-btn">Show</button>
+                    <button type="button" id="generatePassword" class="password-btn">Random</button>
                 </div>
                 <div class="form-group">
                     <label for="isAdmin">
@@ -39,8 +36,7 @@
         </div>
     </main>
 
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/registration.js"></script>
-    <script src="../../js/main.js"></script>
+    <script type="module" src="/admin/js/registration.js"></script>
+    <script type="module" src="/js/common.js"></script>
 </body>
 </html>

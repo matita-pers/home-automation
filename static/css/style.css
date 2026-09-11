@@ -10,7 +10,7 @@ body {
     min-height: 100vh;
 }
 
-.navbar {
+#navbar {
     background-color: #333;
     color: white;
     padding: 1rem 2rem;
@@ -25,7 +25,7 @@ body {
 
 .site-title {
     text-decoration: none;
-    color: white;
+    color: #ae93ff;
 }
 
 .site-title:hover {
@@ -130,6 +130,22 @@ body {
 
 .password-input-container input {
     flex: 1;
+    min-width: 0;
+}
+
+.password-btn {
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.password-btn:hover {
+    background-color: #666;
 }
 
 .toggle-password {
@@ -151,24 +167,37 @@ body {
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 1rem;
     margin-top: 1rem;
 }
 
 .btn:hover {
-    background-color: #45a049;
+    background-color: #419646;
+}
+
+.btn-block {
+    gap: 1rem;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.btn-block .btn {
+    display: block;
+    margin: 0;
 }
 
 .error-message {
-    color: #f44336;
+    color: #fa4336;
     margin-top: 1rem;
     text-align: center;
 }
 
 .success-message {
-    color: #4CAF50;
+    color: #4baf50;
     margin-top: 1rem;
     text-align: center;
 }

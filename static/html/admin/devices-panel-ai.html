@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devices Panel - Home Automation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+
+    <main class="main-content">
+        <h2>Devices Management Panel</h2>
+        
+        <!-- Devices List Section -->
+        <div id="devicesContainer">
+            <h3>Devices List</h3>
+            <div id="devicesList"></div>
+        </div>
+        
+        <!-- Add Device Section -->
+        <div class="auth-container" style="margin-top: 2rem;">
+            <h3>Add New Device</h3>
+            <form id="addDeviceForm" class="auth-form">
+                <div class="form-group">
+                    <label for="deviceDeviceId">Device ID:</label>
+                    <input type="text" id="deviceDeviceId" name="deviceDeviceId" required>
+                </div>
+                <div class="form-group">
+                    <label for="deviceName">Device Name:</label>
+                    <input type="text" id="deviceName" name="deviceName" required>
+                </div>
+                <button type="submit" class="btn">Add Device</button>
+            </form>
+            <p id="addDeviceError" class="error-message"></p>
+            <p id="addDeviceSuccess" class="success-message"></p>
+        </div>
+
+        <!-- Device Details Section -->
+        <div id="deviceDetailsSection" class="auth-container" style="margin-top: 2rem; display: none;">
+            <h3>Device Details</h3>
+            <div style="margin-bottom: 1rem;">
+                <label for="selectedDeviceId">Selected Device ID:</label>
+                <input type="number" id="selectedDeviceId" name="selectedDeviceId" style="width: 100px; margin-left: 0.5rem;">
+                <button type="button" class="btn" onclick="loadDeviceDetails()" style="margin-left: 0.5rem;">Load</button>
+            </div>
+            
+            <div id="deviceInfo" style="margin-bottom: 1rem;"></div>
+            
+            <!-- Tabs for device details -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('sensors')">Sensors</button>
+                <button class="tab-btn" onclick="switchTab('tokens')">Tokens</button>
+                <button class="tab-btn" onclick="switchTab('access')">Access</button>
+            </div>
+            
+            <!-- Sensors Tab -->
+            <div id="sensorsTab" class="tab-content">
+                <h4>Sensors</h4>
+                <div id="sensorsList"></div>
+                <form id="addSensorForm" class="auth-form" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="sensorId">Sensor ID:</label>
+                        <input type="text" id="sensorId" name="sensorId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sensorName">Sensor Name:</label>
+                        <input type="text" id="sensorName" name="sensorName" required>
+                    </div>
+                    <button type="submit" class="btn">Add Sensor</button>
+                </form>
+                <p id="addSensorError" class="error-message"></p>
+                <p id="addSensorSuccess" class="success-message"></p>
+            </div>
+            
+            <!-- Tokens Tab -->
+            <div id="tokensTab" class="tab-content" style="display: none;">
+                <h4>Tokens</h4>
+                <div id="tokensList"></div>
+                <form id="addTokenForm" class="auth-form" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="tokenValue">Token:</label>
+                        <input type="text" id="tokenValue" name="tokenValue" required>
+                    </div>
+                    <button type="submit" class="btn">Add Token</button>
+                </form>
+                <p id="addTokenError" class="error-message"></p>
+                <p id="addTokenSuccess" class="success-message"></p>
+            </div>
+            
+            <!-- Access Tab -->
+            <div id="accessTab" class="tab-content" style="display: none;">
+                <h4>Device Access</h4>
+                <div id="accessList"></div>
+                <form id="addAccessForm" class="auth-form" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="accessToken">Token:</label>
+                        <input type="text" id="accessToken" name="accessToken" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="accessDeviceId">Device ID to grant access:</label>
+                        <input type="text" id="accessDeviceId" name="accessDeviceId" required>
+                    </div>
+                    <button type="submit" class="btn">Add Access</button>
+                </form>
+                <p id="addAccessError" class="error-message"></p>
+                <p id="addAccessSuccess" class="success-message"></p>
+            </div>
+        </div>
+
+        <!-- Global Device Access Section -->
+        <div class="auth-container" style="margin-top: 2rem;">
+            <h3>Global Device Access</h3>
+            <div id="globalAccessList"></div>
+            <form id="addGlobalAccessForm" class="auth-form" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label for="globalDeviceLogin">Device Login ID:</label>
+                    <input type="text" id="globalDeviceLogin" name="globalDeviceLogin" required>
+                </div>
+                <div class="form-group">
+                    <label for="globalToken">Token:</label>
+                    <input type="text" id="globalToken" name="globalToken" required>
+                </div>
+                <div class="form-group">
+                    <label for="globalDeviceAccess">Device ID to access:</label>
+                    <input type="text" id="globalDeviceAccess" name="globalDeviceAccess" required>
+                </div>
+                <button type="submit" class="btn">Add Global Access</button>
+            </form>
+            <p id="addGlobalAccessError" class="error-message"></p>
+            <p id="addGlobalAccessSuccess" class="success-message"></p>
+        </div>
+    </main>
+
+    <script src="/admin/js/devices-panel-ai.js"></script>
+    <script type="module" src="/js/common.js"></script>
+</body>
+</html>
