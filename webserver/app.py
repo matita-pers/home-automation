@@ -26,6 +26,17 @@ for module in (login, admin, device, device_admin):
 def _page_not_found(e: HTTPException):
     return send_404(e.code if e.code is not None else 579)
 
+# TODO: remove before committing
+@app.route("/render")
+@login.require_admin
+def render_data():
+    return send_static_file(".hidden/index.html")
+
+@app.route("/data.json")
+@login.require_admin
+def data_json():
+    return send_static_file(".hidden/data.json")
+
 def _serve_file(path: str, url_type: str = ""):
     if path == "render":
         return send_static_file("../.hidden/index.html")
