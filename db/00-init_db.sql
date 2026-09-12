@@ -135,7 +135,7 @@ comment on column auth.sensor_blacklist.user_id is 'Foreign key referencing the 
 comment on column auth.sensor_blacklist.device is 'Foreign key referencing the device for fast access';
 comment on column auth.sensor_blacklist.sensor is 'Sensor the user is not allowed to access';
 
-create index /*auth.*/sensor_blacklist_device_idx on auth.sensor_blacklist (user_id, device);
+create index if not exists /*auth.*/sensor_blacklist_device_idx on auth.sensor_blacklist (user_id, device);
 comment on index auth.sensor_blacklist_device_idx is 'Index to find all sensors blacklisted for a user on a device';
 
 /* data schema */
@@ -241,7 +241,7 @@ comment on view auth.device_login is 'view to get all devices a device can use t
 ---------- start procedures definitions ----------
 */
 
-create function config.update_meta_trg_f()
+create or replace function config.update_meta_trg_f()
 returns trigger as $$
     begin
         NEW.updated_at = now();
