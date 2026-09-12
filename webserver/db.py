@@ -1,11 +1,12 @@
-import os
+import psycopg2
+from psycopg2 import pool as dbp, errors as dberrs
+from psycopg2.extensions import cursor
+
+import os, sys
 from typing import Any
 from contextlib import contextmanager
 from collections.abc import Iterator
 
-from psycopg2 import pool as dbp, errors as dberrs
-from psycopg2.extensions import cursor
-import psycopg2
 from . import models
 
 DB_URL = os.environ.get("DATABASE_URL")
@@ -179,3 +180,77 @@ def remove_device_access(access_id: int) -> int:
         WHERE id = '{access_id}'
         RETURNING id
     """)
+
+def _seed_db():
+    try:
+        raise Exception("seeding db")
+        with _get_cur() as cur:
+            cur.execute("SELECT value FROM config.meta WHERE key = 'db.script-version'")
+            r = cur.fetchone()
+            db_ver = int(r[0]) if r is not None else 0
+    except:
+        db_ver = 0
+
+    if db_ver == 0:
+        print("Creating db...")
+    else:
+        print("Running migrations scripts ...")
+
+    print(f"db version: {db_ver}")
+
+    from pathlib import Path
+    db_dir = Path(__file__).parent / "../db"
+
+    files = sorted(
+        (f for f in db_dir.iterdir() if f.is_file()),
+        key=lambda f: int(f.name[:2])
+    )
+
+    for f in files:
+        if int(f.name[:2]) < db_ver:
+            continue
+
+        print("Executing " + f.name)
+
+        try:
+            with _get_cur() as cur:
+                cur.execute(f.read_text())
+            print("Done")
+
+        except Exception as e:
+            print("Failed to run script: ")
+            print(e)
+            print("Please check manually")
+            raise
+
+    print("Finished.")
+
+def _execute_sql_args():
+    sql = sys.argv[1]
+    try:
+        with _get_cur() as cur:
+            cur.execute(sql)
+
+            row = cur.fetchone()
+            if row is None:
+                sys.exit(1)
+
+            if len(sys.argv) == 3:
+                col = int(sys.argv[2])
+                if row[col] is None:
+                    sys.exit(2)
+                print(row[col])
+
+        sys.exit(0)
+
+    except Exception as e:
+        print(e)
+        sys.exit(2)
+
+if __name__ == "__main__":
+    # the argv[0] is the script
+    if len(sys.argv) == 1:
+        # If no args seed/update the db
+        _seed_db()
+    else:
+        _execute_sql_args()

@@ -165,7 +165,7 @@ comment on column data.sensor.metric_value is 'metric value';
 comment on column data.sensor.measured_at is 'device time at which the data was measured';
 comment on column data.sensor.sent_at is 'device time at which the data was sent to the server';
 
-create index /*data.*/sensor_lookup_idx on data.sensor (device, sensor, metric_key, timestamp);
+create index if not exists /*data.*/sensor_lookup_idx on data.sensor (device, sensor, metric_key, timestamp);
 comment on index data.sensor_lookup_idx is 'Index to efficiently lookup data from a sensor';
 
 create table if not exists data.aggregated (
@@ -268,3 +268,7 @@ create or replace trigger /*config.*/update_meta_trg
 ---------- end triggers definitions ----------
 */
 
+insert into config.meta (key, value)
+values ('db.script-version', '01')
+-- ignore if already exists (as it may be higher)
+on conflict (key) do nothing;
