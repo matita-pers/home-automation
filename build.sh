@@ -9,7 +9,7 @@ cd "$(dirname -- "$0")"
 
 # minimize the frontend
 mkdir public
-cp static/* public/
+cp -r static/ public/
 
 # create/migrate the db
 python3 -m webserver.db
