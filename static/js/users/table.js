@@ -1,15 +1,22 @@
 import { get, load, store } from '/js/utils.js';
 import * as g from "/js/config.js"
 
-export async function createTable(endpoint, rowFactory, cacheKey = null, expireCache = g.DEFAULT_CACHE) {
+let defaultRows = {};
+
+export async function createTable(table, endpoint, rowFactory, cacheKey = null, expireCache = g.DEFAULT_CACHE, callback = null) {
     let data = cacheKey ? load(cacheKey) : null;
     const time = data ? data.time : 0;
     if (!data || Date.now() - time > expireCache) data = await get(endpoint);
     else data = data.data;
 
-    if (!data || data.length === 0) return;
+if (!defaultRows[table]) defaultRows[table] = table.innerHTML;
 
-    data = [...data].sort((a, b) => {
+    if (!data || data.length === 0) {
+table.innerHTML= defaultRows[table];
+    return;
+}
+
+    data.sort((a, b) => {
         if (a.id == null) return 1;
         if (b.id == null) return -1;
         return a.id - b.id;
@@ -17,11 +24,17 @@ export async function createTable(endpoint, rowFactory, cacheKey = null, expireC
 
     if(cacheKey && time === 0) store(cacheKey, { data, time: Date.now() });
 
-    let res = "";
-    for (let row of data) {
-        res += rowFactory(row);
+    table.innerHTML = "";
+    for (const row of data) {
+        const temp = document.createElement("tbody");
+        temp.innerHTML = rowFactory(row).trim();
+
+        const tr = temp.firstElementChild;
+        if (!tr) continue;
+
+        table.appendChild(tr);
+        if (callback) callback (row, tr);
     }
-    return res;
 }
 
 export function modifyData(cacheKey, filter, updater) {
