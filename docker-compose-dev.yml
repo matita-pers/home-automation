@@ -1,0 +1,60 @@
+x-site: &base-site
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+    args: &site-env
+      PYTHONUNBUFFERED: 1
+      FLASK_SESSION_COOKIE_HTTPONLY: true
+      FLASK_SESSION_COOKIE_SECURE: false
+      FLASK_SECRET_KEY: "change-me@123!"
+      DATABASE_URL: "postgresql://user:pwd123%40@db/dev"
+  volumes:
+    - ./webserver:/data/webserver:ro
+    - ./static:/data/static:ro
+  environment: *site-env
+  ports:
+    - "0.0.0.0:8079:5000"
+  depends_on:
+    db:
+      condition: service_healthy
+  healthcheck:
+    test: [ "CMD", "curl", "-f", "http://localhost" ]
+    interval: 1m30s
+    timeout: 10s
+    retries: 3
+    start_period: 30s
+    start_interval: 15s
+
+services:
+  db:
+    container_name: database
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dev
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pwd123@
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./.db-data:/var/lib/postgresql/:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 30s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
+
+  site-dev:
+    <<: *base-site
+    container_name: flask
+    command: flask --app webserver.app run --host=0.0.0.0 --debug
+    profiles:
+      - dev
+
+  site-prod:
+    <<: *base-site
+    container_name: flask
+    command: flask --app webserver.app run --host=0.0.0.0
+    profiles:
+      - prod

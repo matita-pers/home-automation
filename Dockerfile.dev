@@ -1,0 +1,15 @@
+FROM python:3.14-slim-trixie
+
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+WORKDIR /data
+
+COPY pyproject.toml ./
+COPY build.sh ./
+COPY db/ ./db/
+COPY webserver/ ./webserver/
+COPY static/ ./static/
+
+RUN pip install .
+ENTRYPOINT ["./build.sh"]
