@@ -1,5 +1,5 @@
 import { post, load } from '/js/utils.js'
-import { createTable, modifyData } from '/users/js/table.js'
+import { createTable, modifyData } from '/js/users/table.js'
 import * as g from "/js/config.js"
 
 let defaultUsersRow = null;
@@ -30,7 +30,7 @@ function startEditUser(userid) {
 async function reloadUsers(e) {
     if (!defaultUsersRow) defaultUsersRow = usersTable.innerHTML
 
-    const users = await createTable('/api/admin/users', user => `
+    await createTable(usersTable, '/api/admin/users', user => `
         <tr class = "table-data" onclick="startEditUser(${user.id})">
             <td>${user.id}</td>
             <td>${user.username}</td>
@@ -40,9 +40,10 @@ async function reloadUsers(e) {
                 <button class="btn" onclick="deleteUser(${user.id})">Delete</button>
             </td>
         </tr>
-    `, "usersList", e instanceof MouseEvent ? g.FORCE_CACHE : g.DEFAULT_CACHE);
-
-    usersTable.innerHTML = users ? users : defaultUsersRow;
+    `, "usersList", e instanceof MouseEvent ? g.FORCE_CACHE : g.DEFAULT_CACHE, (user, tr) => {
+        tr.onclick = () => startEditUser(user.id);
+        console.log(tr.childNodes);
+    });
 }
 
 async function updateUser() {

@@ -6,7 +6,7 @@ import os
 from . import login, admin, device, device_admin
 from .utils import send_404, cache, cache_public, send_static_file
 
-version = "1.0.0-alfa-pre-3"
+version = "1.0.0-alfa-pre-4"
 app = Flask(__name__, static_folder=None)
 
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -57,10 +57,6 @@ def _serve_file(path: str, url_type: str = ""):
             return send_static_file(path)
         except:
             use_handler(404)
-
-    if path.split("/", 2)[1] in ["admin", "users"]:
-        # invalid access to file
-        use_handler(404)
 
     if url_type != "":
         url_type += "/"

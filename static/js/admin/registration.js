@@ -32,7 +32,7 @@ async function createUser(e) {
     const password = document.getElementById('password').value;
     const admin = document.getElementById('isAdmin').checked;
 
-    const result = await post('/api/auth/register', { username, password, admin }, 'PUT')
+    const result = await post('/api/admin/users/register', { username, password, admin }, 'PUT')
     if (result.success) {
         document.getElementById('registerSuccess').textContent = result.message || 'User registered successfully';
         document.getElementById('registerError').textContent = '';
