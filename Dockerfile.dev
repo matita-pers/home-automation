@@ -12,4 +12,7 @@ COPY webserver/ ./webserver/
 COPY static/ ./static/
 
 RUN pip install .
-ENTRYPOINT ["./build.sh"]
+RUN ./build.sh
+
+EXPOSE 5000
+ENTRYPOINT ["flask", "--app", "webserver.app", "run", "--host", "0.0.0.0"]
