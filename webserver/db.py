@@ -1,7 +1,7 @@
 from psycopg import errors as dberrs, Cursor
 from psycopg_pool import ConnectionPool
 
-import os, sys
+import os, sys, atexit
 from typing import Any
 from contextlib import contextmanager
 from collections.abc import Iterator
@@ -30,6 +30,17 @@ def _get_cur() -> Iterator[Cursor]:
         except Exception:
             __conn.rollback()
             raise
+
+def close_pool():
+    global _db_pool
+    if _db_pool is not None:
+        try:
+            _db_pool.close()
+        except:
+            pass
+        _db_pool = None
+
+atexit.register(close_pool)
 
 
 def _query(query: str) -> tuple[Any, ...] | None:
@@ -243,6 +254,7 @@ def _migrate_db():
             raise
 
     print("Finished.")
+    if _db_pool is not None: close_pool()
 
 def _execute_sql_args():
     sql = sys.argv[1]
@@ -252,18 +264,22 @@ def _execute_sql_args():
 
             row = cur.fetchone()
             if row is None:
+                if _db_pool is not None: close_pool()
                 sys.exit(1)
 
             if len(sys.argv) == 3:
                 col = int(sys.argv[2])
                 if row[col] is None:
+                    if _db_pool is not None: close_pool()
                     sys.exit(2)
                 print(row[col])
 
+        if _db_pool is not None: close_pool()
         sys.exit(0)
 
     except Exception as e:
         print(e)
+        if _db_pool is not None: close_pool()
         sys.exit(2)
 
 if __name__ == "__main__":
