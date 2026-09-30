@@ -11,5 +11,13 @@ COPY db/ ./db/
 COPY webserver/ ./webserver/
 COPY static/ ./static/
 
+#volume to make it persist between container starts (contains mainly cached data)
+VOLUME /data/public
+
+# Add curl for healthcheck purposes
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+RUN rm -rf /var/lib/apt/lists/*
+
 RUN pip install .
 ENTRYPOINT ["./build.sh"]
