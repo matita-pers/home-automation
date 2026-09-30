@@ -1,6 +1,5 @@
-import psycopg2
-from psycopg2 import pool as dbp, errors as dberrs
-from psycopg2.extensions import cursor
+from psycopg import errors as dberrs, Cursor
+from psycopg_pool import ConnectionPool
 
 import os, sys
 from typing import Any
@@ -16,19 +15,21 @@ if DB_URL is None or DB_URL == "":
 
 _db_pool = None
 @contextmanager
-def _get_cur() -> Iterator[cursor]:
+def _get_cur() -> Iterator[Cursor]:
     global _db_pool
     if _db_pool is None:
-        _db_pool = dbp.SimpleConnectionPool(1, 2, DB_URL)
-    __conn = _db_pool.getconn()
-    try:
-        yield __conn.cursor()
-        __conn.commit()
-    except Exception:
-        __conn.rollback()
-        raise
-    finally:
-        _db_pool.putconn(__conn)
+        if os.environ.__contains__("VERCEL"):
+            _db_pool = ConnectionPool(conninfo=DB_URL, min_size=1, max_size=4, num_workers=2)
+        else:
+
+            _db_pool = ConnectionPool(conninfo=DB_URL, min_size=2)
+    with _db_pool.connection() as __conn:
+        try:
+            yield __conn.cursor()
+            __conn.commit()
+        except Exception:
+            __conn.rollback()
+            raise
 
 
 def _query(query: str) -> tuple[Any, ...] | None:
@@ -49,9 +50,9 @@ def execute_query(query: str) -> int:
             return it[0] if it is not None else -1
     except dberrs.ForeignKeyViolation:
         return -2
-    except psycopg2.IntegrityError:
+    except dberrs.IntegrityError:
         return -3
-    except psycopg2.ProgrammingError:
+    except dberrs.ProgrammingError:
         return -4
 
 def get_user_info(username: str) -> models.User | None:
@@ -202,7 +203,7 @@ def list_user_data(user_id: int) -> list[tuple[str, ...]]:
 def _migrate_db():
     try:
         with _get_cur() as cur:
-            cur.execute("SELECT value FROM config.meta WHERE key = 'db.script-version'")
+            cur.execute("SELECT value FROM config.meta WHERE key = %s", ('db.script-version',))
             r = cur.fetchone()
             db_ver = int(r[0]) if r is not None else 0
     except:
