@@ -54,7 +54,7 @@ def get_users():
         for u in db.list_users()
         ]
 
-@bp.route("/user/<int:user>/rename", methods=["POST"])
+@bp.route("/user/<int:user>/edit", methods=["PUT"])
 def rename_user(user: int):
     parsed = utils.get_json_data("new_name", "admin")
     if isinstance(parsed, Response):
@@ -66,7 +66,7 @@ def rename_user(user: int):
         return jsonify({
             "success": False,
             "code": 500,
-            "message": "unable to rename user",
+            "message": "unable to edit user",
             "error_code": -updated
         }), 500
     return {"success": True}

@@ -42,3 +42,73 @@ if [ $# -gt 0 ]; then
   echo Executing '>'"$*"'<'...
   exec "$@"
 fi
+
+exit 0
+#ai-code:
+# Install build tools
+npm install --no-save \
+    esbuild \
+    lightningcss-cli \
+    html-minifier-terser
+
+# Use binaries installed by npm
+ESBUILD="./node_modules/.bin/esbuild"
+LIGHTNINGCSS="./node_modules/.bin/lightningcss"
+HTML_MINIFIER="./node_modules/.bin/html-minifier-terser"
+
+# Clean output directory
+rm -rf "$DIST"
+mkdir -p "$DIST"
+
+# Copy static assets
+# Copy everything except files that we compile/minify
+find "$SRC" -type f \
+    ! -name '*.html' \
+    ! -name '*.css' \
+    ! -name '*.js' \
+    -exec cp --parents '{}' "$DIST" \;
+
+# Minify JavaScript
+find "$SRC" -type f -name '*.js' | while read -r file; do
+    relative="${file#"$SRC"/}"
+    output="$DIST/$relative"
+
+    mkdir -p "$(dirname "$output")"
+
+    "$ESBUILD" "$file" \
+        --minify \
+        --outfile="$output"
+done
+
+# Minify CSS
+find "$SRC" -type f -name '*.css' | while read -r file; do
+    relative="${file#"$SRC"/}"
+    output="$DIST/$relative"
+
+    mkdir -p "$(dirname "$output")"
+
+    "$LIGHTNINGCSS" \
+        --minify \
+        --bundle \
+        "$file" \
+        -o "$output"
+done
+
+# Minify HTML
+find "$SRC" -type f -name '*.html' | while read -r file; do
+    relative="${file#"$SRC"/}"
+    output="$DIST/$relative"
+
+    mkdir -p "$(dirname "$output")"
+
+    "$HTML_MINIFIER" \
+        --collapse-whitespace \
+        --remove-comments \
+        --remove-redundant-attributes \
+        --remove-empty-attributes \
+        --remove-optional-tags \
+        --minify-css true \
+        --minify-js true \
+        "$file" \
+        -o "$output"
+done

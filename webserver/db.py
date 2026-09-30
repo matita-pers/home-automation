@@ -91,10 +91,17 @@ def add_device(device_id: str, name: str) -> int:
     return execute_query(f"""
         INSERT INTO config.device (device_id, device_name) 
         VALUES ('{device_id}', '{name}') RETURNING id
-""")
+    """)
 
 def list_devices():
     return [r for r in _query_all("SELECT id, device_id, device_name FROM config.device") if r is not None]
+
+def update_device(internal_id: int, device_id: str, name: str) -> int:
+    return execute_query(f"""
+    UPDATE config.device 
+        SET device_id = '{device_id}', device_name = '{name}'
+        WHERE id = {internal_id} RETURNING id
+    """)
 
 def add_device_token(device: int, token: str) -> int:
     return execute_query(f"""
@@ -126,6 +133,14 @@ def add_sensor(device: int, sensor_id: str, sensor_name: str) -> int:
     return execute_query(f"""
         INSERT INTO config.sensor (device, sensor_id, sensor_name)
         VALUES ('{device}', '{sensor_id}', '{sensor_name}') RETURNING id
+    """)
+
+def update_sensor(sensor, sensor_id, name):
+    print("d:" + str(sensor_id) + " " + str(sensor) + " " + name)
+    return execute_query(f"""
+        UPDATE config.sensor
+        SET sensor_id = '{sensor_id}', sensor_name = '{name}'
+        WHERE id = {sensor} RETURNING id
     """)
 
 def remove_sensor(device: int, sensor: int) -> int:
@@ -181,9 +196,8 @@ def remove_device_access(access_id: int) -> int:
         RETURNING id
     """)
 
-def _seed_db():
+def _migrate_db():
     try:
-        raise Exception("seeding db")
         with _get_cur() as cur:
             cur.execute("SELECT value FROM config.meta WHERE key = 'db.script-version'")
             r = cur.fetchone()
@@ -202,12 +216,13 @@ def _seed_db():
     db_dir = Path(__file__).parent / "../db"
 
     files = sorted(
-        (f for f in db_dir.iterdir() if f.is_file()),
+        (f for f in db_dir.iterdir() if f.is_file() and f.name[:2].isdigit()),
         key=lambda f: int(f.name[:2])
     )
 
     for f in files:
         if int(f.name[:2]) < db_ver:
+            print("Skipped " + f.name)
             continue
 
         print("Executing " + f.name)
@@ -251,6 +266,6 @@ if __name__ == "__main__":
     # the argv[0] is the script
     if len(sys.argv) == 1:
         # If no args seed/update the db
-        _seed_db()
+        _migrate_db()
     else:
         _execute_sql_args()

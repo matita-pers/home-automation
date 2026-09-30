@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="module" src="/js/users/redirect.js" blocking="render"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users Panel - Home Automation</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/users/css/tables.css">
+    <link rel="stylesheet" href="/css/users/tables.css">
 </head>
 <body>
     <nav id="navbar"></nav>
@@ -29,37 +30,33 @@
             </table>
             <button id="reloadUsers" class="btn">Reload users table</button>
         </div>
-        
-        <div class="auth-container" style="margin-top: 2rem;">
-            <h3>Edit User</h3>
-            <div style="margin-bottom: 1rem;">
-                <label for="loadUserId">Load User by ID:</label>
-                <input type="number" id="loadUserId" name="loadUserId">
-                <button type="button" id="loadUserForEdit" class="btn">Load</button>
+
+        <div class="edit-forms">
+            <div class="edit-box">
+                <h3>Edit User</h3>
+                <form id="editUserForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="editUserId">User ID:</label>
+                        <input type="number" id="editUserId" name="editUserId" required readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsername">Username:</label>
+                        <input type="text" id="editUsername" name="editUsername" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="editIsAdmin">
+                            <input type="checkbox" id="editIsAdmin" name="editIsAdmin" /> Admin user
+                        </label>
+                    </div>
+                    <button type="submit" class="btn">Update User</button>
+                </form>
+                <p id="editUserError" class="error-message"></p>
+                <p id="editUserSuccess" class="success-message"></p>
             </div>
-            <form id="editUserForm" class="auth-form">
-                <div class="form-group">
-                    <label for="editUserId">User ID:</label>
-                    <input type="number" id="editUserId" name="editUserId" required readonly>
-                </div>
-                <div class="form-group">
-                    <label for="editUsername">Username:</label>
-                    <input type="text" id="editUsername" name="editUsername" required>
-                </div>
-                <div class="form-group">
-                    <label for="editIsAdmin">
-                        <input type="checkbox" id="editIsAdmin" name="editIsAdmin">
-                        Admin user
-                    </label>
-                </div>
-                <button type="submit" class="btn">Update User</button>
-            </form>
-            <p id="editUserError" class="error-message"></p>
-            <p id="editUserSuccess" class="success-message"></p>
         </div>
     </main>
 
-    <script type="module" src="/admin/js/users-panel.js"></script>
+    <script type="module" src="/js/admin/users-panel.js"></script>
     <script type="module" src="/js/common.js"></script>
 </body>
 </html>

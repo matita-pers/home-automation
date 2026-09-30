@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Devices Panel - Home Automation</title>
+    <script type="module" src="/js/users/redirect.js" blocking="render"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/users/tables.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+
+    <main class="main-content">
+        <h2>Devices Management Panel</h2>
+        <div id="devicesContainer">
+            <table id="devicesTable">
+                <thead>
+                    <tr class="table-header">
+                        <th>Internal ID</th>
+                        <th>Device ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="devicesList">
+                    <!-- Devices will be dynamically added here -->
+                <tr class="table-data"> <td colspan="4" class="no-data">No devices found.</td> </tr>
+                </tbody>
+            </table>
+            <button id="reloadDevices" class="btn">Reload devices table</button>
+            <a href="#devicesTokensContainer" class="btn">Manage tokens</a>
+            <a href="#sensorsContainer" class="btn">Manage sensors</a>
+        </div>
+
+        <br />
+
+        <div class="edit-forms">
+            <div class="edit-box">
+                <h3>Add Device</h3>
+                <form id="addDeviceForm">
+                    <div class="form-group">
+                        <label for="addDeviceId">Device ID:</label>
+                        <input type="text" id="addDeviceId" name="addDeviceId" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="addName">Name:</label>
+                        <input type="text" id="addName" name="addName" required />
+                    </div>
+                    <button type="submit" class="btn">Add Device</button>
+                </form>
+                <p id="addDeviceError" class="error-message"></p>
+                <p id="addDeviceSuccess" class="success-message"></p>
+            </div>
+
+            <div class="edit-box">
+                <h3>Edit Device</h3>
+                <form id="editDeviceForm">
+                    <div class="form-group">
+                        <label for="editInternalId">Internal ID:</label>
+                        <input type="number" id="editInternalId" name="editInternalId" required readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="editDeviceId">Device ID:</label>
+                        <input type="text" id="editDeviceId" name="editDeviceId" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="editName">Name:</label>
+                        <input type="text" id="editName" name="editName" required />
+                    </div>
+                    <button type="submit" class="btn">Update Device</button>
+                    <p id="editDeviceError" class="error-message"></p>
+                    <p id="editDeviceSuccess" class="success-message"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- TODO tokens start -->
+        <div id="devicesTokensContainer" class="box">
+            <label for="tokenFilterDeviceID">Device selected: </label>
+            <input type="number" id="tokenFilterDeviceID" name="tokenFilterDeviceID" required />
+            <table id="devicesTokensTable">
+                <thead>
+                    <tr class="table-header">
+                        <th>ID</th>
+                        <th>Device Internal ID</th>
+                        <th>Token</th>
+                    </tr>
+                </thead>
+                <tbody id="devicesTokensList">
+                    <!-- Devices tokens will be dynamically added here -->
+                <tr class="table-data"> <td colspan="4" class="no-data">No device token found.</td> </tr>
+                </tbody>
+            </table>
+            <button id="reloadDevicesTokens" class="btn">Reload tokens table</button>
+
+            <div class="edit-forms">
+                <div class="edit-box">
+                    <h3>Add Token</h3>
+                    <form id="addDeviceTokenForm">
+                        <div class="form-group">
+                            <label for="addDeviceTokenId">Device Internal ID:</label>
+                            <input type="text" id="addDeviceTokenId" name="addDeviceTokenId" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="addToken">Name:</label>
+                            <input type="text" id="addToken" name="addToken" required />
+                        </div>
+                        <button type="submit" class="btn">Add Token</button>
+                    </form>
+                    <p id="addDeviceTokenError" class="error-message"></p>
+                    <p id="addDeviceTokenSuccess" class="success-message"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TODO: sensors -->
+        <div id="sensorsContainer">
+            <table id="sensorsTable">
+                <thead>
+                    <tr class="table-header">
+                        <th>Internal ID</th>
+                        <th>Sensor ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sensorsList">
+                    <!-- Sensors will be dynamically added here -->
+                <tr class="table-data"> <td colspan="4" class="no-data">No Sensor found. Select a device or add one</td> </tr>
+                </tbody>
+            </table>
+            <button id="reloadSensors" class="btn">Reload sensors table</button>
+
+            <br /><!-- idk why but one doesn't work --><br />
+
+            <div class="edit-forms">
+                <div class="edit-box">
+                    <h3>Add Device</h3>
+                    <form id="addSensorForm">
+                        <div class="form-group">
+                            <label for="addDeviceId">Sensor ID:</label>
+                            <input type="text" id="addDeviceId" name="addDeviceId" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="addName">Name:</label>
+                            <input type="text" id="addName" name="addName" required />
+                        </div>
+                        <button type="submit" class="btn">Add Device</button>
+                    </form>
+                    <p id="addDeviceError" class="error-message"></p>
+                    <p id="addDeviceSuccess" class="success-message"></p>
+                </div>
+
+                <div class="edit-box">
+                    <h3>Edit Device</h3>
+                    <form id="editSensorForm">
+                        <div class="form-group">
+                            <label for="editInternalId">Internal ID:</label>
+                            <input type="number" id="editInternalId" name="editInternalId" required readonly />
+                        </div>
+                        <div class="form-group">
+                            <label for="editSensorId">Sensor ID:</label>
+                            <input type="text" id="editSensorId" name="editSensorId" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="editName">Name:</label>
+                            <input type="text" id="editName" name="editName" required />
+                        </div>
+                        <button type="submit" class="btn">Update Device</button>
+                        <p id="editSensorError" class="error-message"></p>
+                        <p id="editSensorSuccess" class="success-message"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="/js/admin/devices-panel.js"></script>
+    <script type="module" src="/js/common.js"></script>
+</body>
+</html>

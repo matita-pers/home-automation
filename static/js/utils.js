@@ -37,6 +37,10 @@ export async function post(path, data, method = "POST") {
   }
 }
 
+export async function put(path, data) {
+  return await post(path, data, "PUT");
+}
+
 export async function refreshSession() {
   remove("session");
   return await getSession();

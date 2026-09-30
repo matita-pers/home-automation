@@ -173,6 +173,10 @@ body {
     margin-top: 1rem;
 }
 
+a.btn {
+    text-decoration: none
+}
+
 .btn:hover {
     background-color: #419646;
 }
@@ -200,4 +204,12 @@ body {
     color: #4baf50;
     margin-top: 1rem;
     text-align: center;
+}
+
+.box {
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

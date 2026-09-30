@@ -37,3 +37,71 @@ td {
 .table-data:nth-child(even) td {
     background: #4b9664;
 }
+
+.table-data #btn-col {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-box {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #caffee;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.edit-box h3 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.edit-forms {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
+    width: 100%;
+}
+
+.edit-forms .edit-box {
+    flex: 1;
+    max-width: 400px;
+    margin: 0;
+}
+
+.edit-box .form-group:has(input[readonly]) {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.edit-box .form-group:has(input[readonly]) label {
+    margin: 0;
+}
+
+.edit-box .form-group:has(input[readonly]) input {
+    width: auto;
+    padding: 0;
+}
+
+.edit-box .form-group input {
+    padding: 0.5rem;
+}
+
+/* on mobile the forms will be stacked vertically */
+@media (max-width: 800px) {
+    .edit-forms {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .edit-forms .edit-box {
+        width: 100%;
+        max-width: 400px;
+    }
+}

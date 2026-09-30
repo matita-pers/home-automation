@@ -50,6 +50,24 @@ def get_devices():
         for d in db.list_devices()
     ]
 
+@bp.route("/<int:device>/edit", methods=["PUT"])
+@login.require_admin
+def edit_device(device: int):
+    parsed = utils.get_json_data("device_id", "device_name")
+    if isinstance(parsed, Response):
+        return parsed
+
+    device_id, name = parsed
+    updated = db.update_device(device, device_id, name)
+    if updated < 0:
+        return jsonify({
+            "success": False,
+            "code": 500,
+            "message": "unable to update device",
+            "error_code": -updated
+        }), 500
+    return {"success": True}
+
 @device_bp.route("/tokens")
 def get_device_tokens(device: int):
     return [
@@ -129,9 +147,26 @@ def add_sensors(device: int):
 
     return {"success": "true", "id": sid}
 
+@device_bp.route("/sensor/<int:sensor>/edit", methods=["PUT"])
+def update_sensor(device: int, sensor: int):
+    parsed = utils.get_json_data("sensor_id", "sensor_name")
+    if isinstance(parsed, Response):
+        return parsed
+
+    sensor_id, name = parsed
+    res = db.update_sensor(sensor, sensor_id, name)
+    if res < 0:
+        return jsonify({
+            "success": False,
+            "code": 409,
+            "message": "unable to edit sensor",
+            "error_code": -res
+        }), 409
+
+    return {"success": True}
+
 @device_bp.route("/sensor/<int:sensor>/remove", methods=["PUT"])
 def remove_sensor(device: int, sensor: int):
-
     res = db.remove_sensor(device, sensor)
     if res < 0:
         return jsonify({
