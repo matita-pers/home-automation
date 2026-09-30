@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Data Panel - Home Automation</title>
+    <script type="module" src="/js/users/redirect.js" blocking="render"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/users/tables.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+
+    <main class="main-content">
+        <h2>Data Panel</h2>
+        <div id="dataContainer">
+            <table id="dataTable">
+                <thead>
+                    <tr class="table-header">
+                        <th>Device</th>
+                        <th>Sensor name</th>
+                        <th>Sensor id</th>
+                        <th>Key</th>
+                        <th>Reception time</th>
+                        <th>Sent time</th>
+                        <th>Measured time</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody id="dataList">
+                    <!-- the sensor data will be dynamically added here -->
+                <tr class="table-data"> <td colspan="4" class="no-data">No data available.</td> </tr>
+                </tbody>
+            </table>
+            <button id="reloadData" class="btn">Reload sensors data</button>
+        </div>
+    </main>
+
+    <script type="module" src="/js/users/data-panel.js"></script>
+    <script type="module" src="/js/common.js"></script>
+</body>
+</html>

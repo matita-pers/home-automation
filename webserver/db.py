@@ -196,6 +196,9 @@ def remove_device_access(access_id: int) -> int:
         RETURNING id
     """)
 
+def list_user_data(user_id: int) -> list[tuple[str, ...]]:
+    return _query_all(f" SELECT * FROM data.user_sensor_data WHERE user_id = {user_id} ")
+
 def _migrate_db():
     try:
         with _get_cur() as cur:

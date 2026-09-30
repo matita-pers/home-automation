@@ -1,4 +1,4 @@
-name: home-automation-site
+name: domotica
 
 x-site: &base-site
   build:
@@ -23,9 +23,6 @@ x-site: &base-site
     retries: 3
     start_period: 30s
     start_interval: 15s
-  volumes:
-    - ./webserver:/data/webserver:ro
-    - ./static:/data/static:ro
 
 services:
   db:
@@ -53,7 +50,9 @@ services:
     container_name: site-dev
     command: flask --app webserver.app run --host=0.0.0.0 --debug
     volumes:
-      - site-build:/data/public
+      - site-build:/data/public:rw
+      - ./webserver:/data/webserver:ro
+      - ./static:/data/static:ro
     profiles:
       - dev
 
@@ -62,7 +61,9 @@ services:
     container_name: site
     command: flask --app webserver.app run --host=0.0.0.0
     volumes:
-      - site-build-prod:/data/public
+      - site-build-prod:/data/public:rw
+      - ./webserver:/data/webserver:ro
+      - ./static:/data/static:ro
     profiles:
       - prod
 

@@ -24,3 +24,20 @@ insert into auth.user_device_permission (user_id, device, admin) values (1, 1, t
 insert into auth.user_device_permission (user_id, device) values (1, 2);
 
 insert into auth.sensor_blacklist (user_id, device, sensor) values (1, 2, 4);
+
+/* example sensor data */
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (1, 1, 'example', 1, 10, 50);
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (1, 1, 'example', 1, 100, 250);
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (1, 2, 'smth-else', 12, 10, 50);
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (1, 2, 'smth-else', 16, 100, 250);
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (1, 3, 'dummy', 69, 10, 50);
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (2, 4, 'key', 42, 42, 42);
+insert into data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at)
+    values (2, 5, 'd2s2-data', 67, 67, 67);
+

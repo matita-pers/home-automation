@@ -236,6 +236,25 @@ create or replace view auth.device_login as
 
 comment on view auth.device_login is 'view to get all devices a device can use to upload data';
 
+create or replace view data.user_sensor_data as
+    select ua.user_id,
+           d.device,
+           d.sensor as sensor_id_db,
+           ua.internal_name as sensor_id,
+           ua.sensor_name,
+           d.timestamp,
+           d.metric_key as d_key,
+           d.metric_value as value,
+           d.measured_at,
+           d.sent_at
+    from data.sensor d
+    join auth.user_sensors ua /* user auth */
+        on d.sensor = ua.sensor_id
+        and d.device = ua.device
+;
+
+comment on view data.user_sensor_data is 'view to get the sensor data a user has access to';
+
 /*
 ---------- end views definitions ----------
 ---------- start procedures definitions ----------

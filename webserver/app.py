@@ -1,9 +1,9 @@
-from flask import Flask, session, request
+from flask import Flask
 from flask import abort as use_handler
 from werkzeug.exceptions import HTTPException
 import os
 
-from . import login, admin, device, device_admin
+from . import login, admin, device, device_admin, user
 from .utils import send_404, cache, cache_public, send_static_file
 
 version = "1.0.0-alfa-pre-4"
@@ -18,7 +18,7 @@ app.config.from_prefixed_env()
 
 app.config['VERSION'] = version
 
-for module in (login, admin, device, device_admin):
+for module in (login, admin, device, device_admin, user):
     module.load(app)
 
 @app.errorhandler(405)
