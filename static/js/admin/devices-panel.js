@@ -7,7 +7,7 @@ const sensorsTable = document.getElementById('sensorsList');
 const deviceEditForm = document.getElementById('editDeviceForm');
 const sensorEditForm = document.getElementById('editSensorForm');
 
-function del(user) {
+function deleteUser(user) {
     if (confirm(`Are you sure you want to delete ${user}?`)) {
         alert("Unimplemented, use the db genius") //TODO
     }
@@ -42,7 +42,7 @@ function reloadDevices(e) {
         t.compoundCallback(t.rowClickCallback(manageDevice),
             t.createAddButtonsCallback(
                 { fn: editDevice, name: "Edit" },
-                { fn: del, name: "Delete" },
+                { fn: deleteUser, name: "Delete" },
             )
         ),
     ).catch(console.error);
