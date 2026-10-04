@@ -5,6 +5,7 @@ from flask import g as g_ctx, abort as use_handler
 import functools
 
 from . import db, models
+from .utils import base_str_re as str_re
 
 bp = Blueprint("device_communication", __name__, url_prefix="/internal")
 
@@ -26,11 +27,10 @@ def login(f):
         if parts[0] != "Basic:" or len(parts[1]) < 2 or len(parts[2]) < 2:
             return use_handler(404)
 
-        g_ctx.authorized_devices = db.login_device(parts[1], parts[2])
+        if str_re.match(parts[1]) in None or str_re.match(parts[2]) is None:
+            return use_handler(404)
 
-        print("logged in device: ")
-        print(auth)
-        print(g_ctx.authorized_devices)
+        g_ctx.authorized_devices = db.login_device(parts[1], parts[2])
 
         if len(g_ctx.authorized_devices) == 0:
             return use_handler(404)
@@ -46,7 +46,6 @@ def a(device: int):
 
     try:
         parsed = models.ReceivedData(data)
-        print("parsed: ", parsed)
 
         db.save_sensor_data(device, parsed)
 

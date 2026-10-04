@@ -8,7 +8,7 @@ from collections.abc import Iterator
 
 from . import models
 
-DB_URL = os.environ.get("DATABASE_URL")
+DB_URL: str = os.environ.get("DATABASE_URL", "")
 
 if DB_URL is None or DB_URL == "":
     raise Exception("DATABASE_URL is not set")
@@ -89,10 +89,11 @@ def save_sensor_data(device: int, data: models.ReceivedData):
 
     query += "RETURNING 1"
 
-    # Not inserting rn
-    print("INSERT: ", query)
-    return
-    _execute_query(query)
+    if os.environ["INSERT_DEVICE"]:
+        _execute_query(query)
+    else:
+
+        print("INSERT: ", query)
 
 def get_user_info(username: str) -> models.User | None:
     r = _query(f"SELECT id, username, password_hash, salt, algorithm, admin FROM auth.user WHERE username = '{username}'")

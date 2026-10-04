@@ -6,6 +6,7 @@ import re, functools, os
 
 username_re = re.compile(r"^[a-zA-Z0-9.\\$_-]{4,16}$")
 password_re = re.compile(r"^[a-zA-Z0-9.\\$!?@#&+:,;<>=àèéòçùì§\[\](){}€^_-]{6,48}$")
+base_str_re = re.compile(r"^[a-zA-Z0-9.-_]+$")
 
 _STATIC_DIR = os.path.join(os.path.dirname(str(__file__)), "../static")
 def send_static_file(path: str):
