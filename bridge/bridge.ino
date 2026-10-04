@@ -127,7 +127,7 @@ void loop() {
         WiFi.reconnect();
         Serial.print("WiFi: st:");
         Serial.print(WiFi.status());
-        Serial.println("; manual reconneconnection");
+        Serial.println("; manual reconnection");
         delay(1000); // wait a second
         return;
     }
@@ -140,28 +140,27 @@ void loop() {
     http.setUserAgent("esp32bridge-" DEVICE_ID "/" VERSION);
 
     // TODO: Replace with real sensor reads
-    String payload = "<example:1.4;time:15;sent:19;>"; 
+    String payload = "<<s:s1;<d:1;ab:67>t:2><<d:34>t:42>t:100>";
+    Serial.print("Sent: ");
+    Serial.println(millis());
 
     int httpCode = http.POST(payload);
     Serial.print("sent data, got: ");
     Serial.println(httpCode);
 
-    if (MAX_401_RETRIES > 0) {
-        if (httpCode == 401 || httpCode == 404 || httpCode == 403) {
-            unauthCount++;
-            if (unauthCount >= MAX_401_RETRIES) {
-                // Void the token in flash
-                prefs.begin("config", false);
-                prefs.remove("token"); 
-                prefs.end();
-                
-                // Restart to trigger AP mode on next boot
-                ESP.restart();
-            }
-        } else if (httpCode >= 200 && httpCode < 300) {
-            // Reset counter on successful transmission
-            unauthCount = 0; 
+    if (httpCode == 401 || httpCode == 404 || httpCode == 403) {
+        if (MAX_401_RETRIES > 0 && unauthCount++ >= MAX_401_RETRIES) {
+            // Void the token in flash
+            prefs.begin("config", false);
+            prefs.remove("token"); 
+            prefs.end();
+            
+            // Restart to trigger AP mode on next boot
+            ESP.restart();
         }
+    } else if (httpCode >= 200 && httpCode < 300) {
+        // Reset counter on successful transmission
+        unauthCount = 0; 
     }
     
     http.end();
