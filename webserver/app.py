@@ -47,20 +47,32 @@ def _serve_file(path: str, url_type: str = ""):
         path = path.lstrip("/")
     if ext == "" or file.find(".") <= 0:
         ext = "html"
+        path = path.rstrip("/")
         path += ".html"
 
     if ext.lower() == "html":
         path = "html/" + path
 
     if len(path.split("/", 2)) == 1:
+        # this is
         try:
             return send_static_file(path)
         except:
             use_handler(404)
 
-    if url_type != "":
-        url_type += "/"
-    path = path.split("/", 1)[0] + "/" + url_type + path.split("/", 1)[1]
+    if url_type == "":
+        # The default (/<path>) handler was used; perform access control manually
+        # note that the path is already correct
+        _url_type = path.split("/")[1]
+        if _url_type == "users":
+            if not login.check_login():
+                return login.redirect_login()
+
+        elif url_type == "admin":
+            login.check_admin()
+    else:
+        # TODO: migrate away from it
+        path = path.split("/", 1)[0] + "/" + url_type + "/" + path.split("/", 1)[1]
 
     try:
         return send_static_file(path)
