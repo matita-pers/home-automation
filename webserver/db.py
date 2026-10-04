@@ -53,7 +53,7 @@ def _query_all(query: str) -> list[tuple[Any, ...]]:
         cur.execute(query)
         return cur.fetchall()
 
-def execute_query(query: str) -> int:
+def _execute_query(query: str) -> int:
     try:
         with _get_cur() as cur:
             cur.execute(query)
@@ -72,11 +72,8 @@ def get_user_info(username: str) -> models.User | None:
         return None
     return models.User(*r)
 
-def login_device(device_id: str, api_key: str) -> list[tuple[str, str]]:
-    return _query_all(f"SELECT auth_device, auth_device_id FROM auth.device_login WHERE device_id = {device_id} AND token = '{api_key}'")
-
 def create_user(user: models.User) -> int:
-    uid = execute_query(f"""
+    uid = _execute_query(f"""
     INSERT INTO auth.user (username, password_hash, salt, algorithm, admin) 
     VALUES ('{user.username}', '{user.password_hash}', '{user.salt}', '{user.algorithm}', {user.admin}) RETURNING id
     """)
@@ -89,10 +86,10 @@ def list_users():
     return [models.User(*r) for r in _query_all("SELECT id, username, password_hash, salt, algorithm, admin FROM auth.user") if r is not None]
 
 def update_user(uid: int, username: str, admin: bool) -> int:
-    return execute_query(f"UPDATE auth.user SET username = '{username}', admin = {admin} WHERE id = {uid} RETURNING id")
+    return _execute_query(f"UPDATE auth.user SET username = '{username}', admin = {admin} WHERE id = {uid} RETURNING id")
 
 def change_password(u: models.User) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         UPDATE auth.user 
         SET password_hash = '{u.password_hash}', salt = '{u.salt}', algorithm = '{u.algorithm}' 
         WHERE id = {u.uid} RETURNING id
@@ -100,7 +97,7 @@ def change_password(u: models.User) -> int:
 
 
 def add_device(device_id: str, name: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         INSERT INTO config.device (device_id, device_name) 
         VALUES ('{device_id}', '{name}') RETURNING id
     """)
@@ -109,20 +106,20 @@ def list_devices():
     return [r for r in _query_all("SELECT id, device_id, device_name FROM config.device") if r is not None]
 
 def update_device(internal_id: int, device_id: str, name: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
     UPDATE config.device 
         SET device_id = '{device_id}', device_name = '{name}'
         WHERE id = {internal_id} RETURNING id
     """)
 
 def add_device_token(device: int, token: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         INSERT INTO auth.device_token (device, token)
         VALUES ('{device}', '{token}') RETURNING id
     """)
 
 def remove_device_token(device: int, token: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         DELETE FROM auth.device_token
         WHERE device = '{device}'
         AND token = '{token}'
@@ -142,21 +139,21 @@ def list_sensors(device: int):
     return _query_all(f""" SELECT id, sensor_id, sensor_name FROM config.sensor WHERE device = '{device}' """)
 
 def add_sensor(device: int, sensor_id: str, sensor_name: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         INSERT INTO config.sensor (device, sensor_id, sensor_name)
         VALUES ('{device}', '{sensor_id}', '{sensor_name}') RETURNING id
     """)
 
 def update_sensor(sensor, sensor_id, name):
     print("d:" + str(sensor_id) + " " + str(sensor) + " " + name)
-    return execute_query(f"""
+    return _execute_query(f"""
         UPDATE config.sensor
         SET sensor_id = '{sensor_id}', sensor_name = '{name}'
         WHERE id = {sensor} RETURNING id
     """)
 
 def remove_sensor(device: int, sensor: int) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         DELETE FROM config.sensor
         WHERE device = '{device}'
         AND id = '{sensor}'
@@ -178,7 +175,7 @@ def list_device_access_all():
 
 # takes the machine id
 def add_device_access(device_login: str, token: str, device_access: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         INSERT INTO auth.device_access (login_id, device)
         SELECT l.id, d2.id
             FROM config.device d, auth.device_token l, config.device d2
@@ -191,7 +188,7 @@ def add_device_access(device_login: str, token: str, device_access: str) -> int:
 
 # takes the db id
 def add_device_access2(device_login: int, token: str, device_access: str) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         INSERT INTO auth.device_access (login_id, device)
         SELECT l.id, d.id
             FROM auth.device_token l, config.device d
@@ -202,7 +199,7 @@ def add_device_access2(device_login: int, token: str, device_access: str) -> int
     """)
 
 def remove_device_access(access_id: int) -> int:
-    return execute_query(f"""
+    return _execute_query(f"""
         DELETE FROM auth.device_access
         WHERE id = '{access_id}'
         RETURNING id
