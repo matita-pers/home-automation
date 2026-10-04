@@ -238,7 +238,9 @@ comment on view auth.device_login is 'view to get all devices a device can use t
 
 create or replace view data.user_sensor_data as
     select ua.user_id,
-           d.device,
+           d.device as device_id_db,
+           de.device_name,
+           de.device_id,
            d.sensor as sensor_id_db,
            ua.internal_name as sensor_id,
            ua.sensor_name,
@@ -247,10 +249,12 @@ create or replace view data.user_sensor_data as
            d.metric_value as value,
            d.measured_at,
            d.sent_at
-    from data.sensor d
+    from data.sensor d /* data */
     join auth.user_sensors ua /* user auth */
         on d.sensor = ua.sensor_id
         and d.device = ua.device
+    join config.device de
+        on d.device = de.id
 ;
 
 comment on view data.user_sensor_data is 'view to get the sensor data a user has access to';

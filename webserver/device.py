@@ -37,8 +37,21 @@ def login(f):
         return f(*args, **kwargs)
     return decorate
 
-@bp.route("/device/<int:device>/bulk", methods=["POST"])
+@bp.route("/device/<device>/bulk", methods=["POST"])
 @login
 def a(device: int):
     print(f"received a request for device {device}")
-    return ""
+    data = request.data.decode()
+    print("data: ", data)
+
+    try:
+        parsed = models.ReceivedData(data)
+        print("parsed: ", parsed)
+
+        db.save_sensor_data(device, parsed)
+
+        return "ok", 204
+    except Exception as e:
+        print("Error in parse: ", e)
+
+    return "", 200

@@ -12,14 +12,15 @@ def load(app: Flask) -> None:
 def get_all_sensor_data():
     return [
         {
-            "device": d[1],
-            "sensor_id": d[3],
-            "sensor_name": d[4],
-            "timestamp": d[5],
-            "measured_at": d[8],
-            "sent_at": d[9],
-            "key": d[6],
-            "value": d[7]
+            "device": d[2],
+            "device_id": d[3],
+            "sensor_id": d[5],
+            "sensor_name": d[6],
+            "timestamp": d[7],
+            "measured_at": d[10],
+            "sent_at": d[11],
+            "key": d[8],
+            "value": d[9]
         }
         for d in db.list_user_data(session["userid"])
     ]

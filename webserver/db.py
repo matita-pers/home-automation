@@ -66,6 +66,34 @@ def _execute_query(query: str) -> int:
     except dberrs.ProgrammingError:
         return -4
 
+def login_device(device_id: str, api_key: str) -> list[tuple[str, str]]:
+    return _query_all(f"SELECT auth_device, auth_device_id FROM auth.device_login WHERE device_id = '{device_id}' AND token = '{api_key}'")
+
+def save_sensor_data(device: int, data: models.ReceivedData):
+    time = data.device_time
+    query = "INSERT INTO data.sensor (device, sensor, metric_key, metric_value, measured_at, sent_at) VALUES "
+    first = True
+
+    for d in data.data:
+        for metric_key, metric_value in d.data.items():
+            if first:
+                first = False
+            else:
+                query += f","
+            single_query = (
+                f"((SELECT id FROM config.device WHERE device_id = '{device}'),"
+                f"(SELECT s.id FROM config.sensor s WHERE s.device = (SELECT id FROM config.device WHERE device_id = '{device}') AND s.sensor_id = '{d.sensor_id}'), "
+                f"'{metric_key}', {metric_value}, {d.device_time}, {time})"
+            )
+            query += single_query
+
+    query += "RETURNING 1"
+
+    # Not inserting rn
+    print("INSERT: ", query)
+    return
+    _execute_query(query)
+
 def get_user_info(username: str) -> models.User | None:
     r = _query(f"SELECT id, username, password_hash, salt, algorithm, admin FROM auth.user WHERE username = '{username}'")
     if r is None:

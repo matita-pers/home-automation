@@ -8,12 +8,11 @@ function reloadData(e) {
         <tr class = "table-data">
             <td>${d.device}</td>
             <td>${d.sensor_name}</td>
-            <td>${d.sensor_id}</td>
             <td>${d.key}</td>
+            <td>${d.value}</td>
             <td>${d.timestamp}</td>
             <td>${d.sent_at}</td>
             <td>${d.measured_at}</td>
-            <td>${d.value}</td>
         </tr>
     `, { key: "sensorDataList", time: e instanceof MouseEvent ? g.FORCE_CACHE : g.DEFAULT_CACHE },
     ).catch(console.error);

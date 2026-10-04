@@ -15,13 +15,19 @@ pepper = os.environ.get("pepper", 'pepper123')
 def load(app: Flask) -> None:
     app.register_blueprint(bp)
 
+def check_login():
+    return session.get("logged_in")
+
+def redirect_login():
+    return redirect("/login?redirect_to=" + request.url)
+
 def require_login(f):
     @functools.wraps(f)
     def decorate(*args, **kwargs):
-        if session.get("logged_in"):
+        if check_login():
             return f(*args, **kwargs)
 
-        return redirect("/login?redirect_to=" + request.url)
+        return redirect_login()
     return decorate
 
 def check_admin() -> None:
