@@ -12,7 +12,7 @@ x-site: &base-site
       DATABASE_URL: "postgresql://user:pwd123%40@db/dev"
   environment: *site-env
   ports:
-    - "0.0.0.0:8079:5000"
+    - "0.0.0.0:8080:5000"
   depends_on:
     db:
       condition: service_healthy
