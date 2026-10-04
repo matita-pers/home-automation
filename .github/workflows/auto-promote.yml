@@ -259,7 +259,13 @@ jobs:
             gh pr comment $PR_NUMBER --body \
               "❌ Auto-promotion failed: push to main failed.\nEnsure the branch is up to date and there are <= 8 commits to rebase."
           else
-            gh pr comment $PR_NUMBER --body "✅ PR successfully auto-promoted to main."
+            if [ ${{ needs.find-pr.outputs.deployed }} == 'true' ]; then
+              reason="Site deployment succeeded"
+            else
+              reason="Deployment skipped (no site-related files were edited)"
+            fi
+          
+            gh pr comment $PR_NUMBER --body "✅ PR successfully auto-promoted to main: $reason"
           fi
           exit $code
         # I am doing my own error checking
