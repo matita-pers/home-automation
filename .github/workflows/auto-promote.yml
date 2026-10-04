@@ -103,6 +103,7 @@ jobs:
           case "$draft" in
             false) ;;
             *)
+              echo "is_draft=true" >> $GITHUB_OUTPUT
               echo "::error::the pr is in draft state"
               exit 1
               ;;
@@ -187,6 +188,31 @@ jobs:
         env:
           BURL: ${{ github.event.deployment_status.target_url }}
           BYPASS_SECRET: ${{ secrets.VERCEL_BYPASS_SECRET }}
+        # I am doing my own error checking
+        shell: /usr/bin/bash {0}
+
+      - name: Post failure comment
+        if: failure() && steps.check-draft.outputs.is_draft != 'true'
+        run: |
+          case "${{ job.status }}" in
+            failure)
+              FAILED_STEP=""
+              if [[ "${{ steps.check-draft.outcome }}" == "failure" ]]; then FAILED_STEP="Check if PR is draft";
+              elif [[ "${{ steps.check-author.outcome }}" == "failure" ]]; then FAILED_STEP="Check if PR author is authorized";
+              elif [[ "${{ steps.check-base.outcome }}" == "failure" ]]; then FAILED_STEP="Check if base branch is eligible for auto-merge";
+              elif [[ "${{ steps.check-head.outcome }}" == "failure" ]]; then FAILED_STEP="Check if head branch is eligible for auto-merge";
+              elif [[ "${{ steps.check-site.outcome }}" == "failure" ]]; then FAILED_STEP="Check if site is working fine";
+              elif [[ "${{ steps.rebase.outcome }}" == "failure" ]]; then FAILED_STEP="Rebase PR";
+              fi
+              
+              if [ -n "$FAILED_STEP" ]; then
+                gh pr comment $PR_NUMBER --body "❌ Auto-promotion failed: step '$FAILED_STEP' failed. Please check the workflow logs for details."
+              else
+                gh pr comment $PR_NUMBER --body "❌ Auto-promotion failed: one or more checks failed. Please check the workflow logs for details."
+              fi
+              ;;
+          esac
+        shell: bash
 
   rebase:
     name: Rebase PR
@@ -229,8 +255,14 @@ jobs:
           git push origin HEAD:main
           code=$?
           if [ $code -ne 0 ]; then
-            echo "::error::push failed, ensure the branch is up to date"
+            echo "::error::push failed, ensure the branch is up to date and there are <= 8 commits to rebase"
+            gh pr comment $PR_NUMBER --body \
+              "❌ Auto-promotion failed: push to main failed.\nEnsure the branch is up to date and there are <= 8 commits to rebase."
+          else
+            gh pr comment $PR_NUMBER --body "✅ PR successfully auto-promoted to main."
           fi
           exit $code
         # I am doing my own error checking
         shell: /usr/bin/bash {0}
+        env:
+          GH_TOKEN: ${{ steps.login.outputs.token }}
