@@ -1,0 +1,93 @@
+name: Backend Bug Report
+description: File a bug report for the site backend
+title: "[site]: "
+labels: ["backend", "bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a backend issue! Providing detailed information helps triage and resolve the problem efficiently
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the backend bug
+      placeholder: Describe the problem, failure scenario, or erroneous behavior...
+    validations:
+      required: true
+
+  - type: input
+    id: affected-endpoint
+    attributes:
+      label: Affected Endpoint
+      description: The API route involved (e.g. `POST /api/login`)
+      placeholder: "e.g., POST /api/devices"
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions or HTTP requests to reproduce the issue
+      placeholder: |
+        1. Send request: POST /api/... with payload {...}
+        2. Inspect response / server log
+        3. Observe error / unexpected status code
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen when the backend works correctly
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened (e.g., HTTP 500 status, database connection error, invalid JSON payload, race condition)
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Time of Occurrence
+      description: Paste relevant server logs, or (if using an official site) the time of occurrence
+    validations:
+      required: false
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Where did this bug occur?
+      placeholder: |
+        - locally (include the commit hash)
+        - on an official site (include which one)
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context, database state, configuration details, or related issues
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: validation-checklist
+    attributes:
+      label: Checklist
+      description: Please verify before submitting.
+      options:
+        - label: I have verified that this issue is not already reported
+          required: true
+        - label: I have included all relevant server logs/time of occurrence
+          required: true
