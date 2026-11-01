@@ -36,12 +36,12 @@ def close_pool():
     if _db_pool is not None:
         try:
             _db_pool.close()
-        except:
+        except Exception as e:
+            print("Error closing db pool", e)
             pass
         _db_pool = None
 
 atexit.register(close_pool)
-
 
 def _query(query: str) -> tuple[Any, ...] | None:
     with _get_cur() as cur:
@@ -53,10 +53,12 @@ def _query_all(query: str) -> list[tuple[Any, ...]]:
         cur.execute(query)
         return cur.fetchall()
 
-def _execute_query(query: str) -> int:
+def _execute_query(query: str, get_ret: bool = True) -> int:
     try:
         with _get_cur() as cur:
             cur.execute(query)
+            if not get_ret:
+                return 1
             it = cur.fetchone()
             return it[0] if it is not None else -1
     except dberrs.ForeignKeyViolation:
@@ -65,6 +67,26 @@ def _execute_query(query: str) -> int:
         return -3
     except dberrs.ProgrammingError:
         return -4
+
+def get(key: str, default: Any = None) -> str | Any:
+    """
+    loads a value from the database
+    :param key: the key used to identify the requested value
+    :param default: returned when there is no data associated with the given key
+    :return: the value or None if not found
+    """
+    res = _query(f"SELECT value FROM config.meta WHERE key = '{key}'")
+    return res[0] if res is not None else default
+
+def store(key: str, value: str) -> int:
+    """
+    stores a value in the database
+    :param key: the key used to identify the stored value
+    :param value: the value to store
+    :return: 1 if the operation succeeded, else the codes from :func:`_execute_query`
+    """
+    return _execute_query(f"INSERT INTO config.meta (key, value) VALUES ('{key}', '{value}')"
+                          f"ON CONFLICT (key) DO UPDATE SET value = '{value}'", False)
 
 def login_device(device_id: str, api_key: str) -> list[tuple[str, str]]:
     return _query_all(f"SELECT auth_device, auth_device_id FROM auth.device_login WHERE device_id = '{device_id}' AND token = '{api_key}'")

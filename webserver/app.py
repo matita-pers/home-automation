@@ -3,10 +3,10 @@ from flask import abort as use_handler
 from werkzeug.exceptions import HTTPException
 import os
 
-from . import login, admin, device, device_admin, user
+from . import login, admin, device, device_admin, user, reports
 from .utils import send_404, cache, cache_public, send_static_file
+from .constants import version
 
-version = "1.0.0-alfa-pre-5"
 app = Flask(__name__, static_folder=None)
 
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -18,7 +18,7 @@ app.config.from_prefixed_env()
 
 app.config['VERSION'] = version
 
-for module in (login, admin, device, device_admin, user):
+for module in (login, admin, device, device_admin, user, reports):
     module.load(app)
 
 @app.errorhandler(405)
