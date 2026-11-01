@@ -12,8 +12,8 @@ create table if not exists config.meta (
     created_at timestamptz default now() not null
 );
 
-comment on table config.meta is 'table to store metadata & single configs of the app';
-comment on column config.meta.key is 'the metadata name (eg: version)';
+comment on table config.meta is 'table to store metadata & single configs of the app as a key-value pair';
+comment on column config.meta.key is 'the metadata name/config (eg: version)';
 comment on column config.meta.value is 'the value associated with the key';
 comment on column config.meta.updated_at is 'last updated time';
 comment on column config.meta.created_at is 'created time';
