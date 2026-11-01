@@ -1,0 +1,53 @@
+name: Feature Request
+description: Suggest an idea or feature for the project
+title: "[Feat]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Structuring feature proposals clearly ensures issues provide maximum value and utility for everyone involved in development.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Need
+      description: Is your feature request related to a problem or limitation? Please provide a clear and concise description.
+      placeholder: Describe the current problem or workflow bottleneck...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: A clear and concise description of what you want to happen and the expected benefit.
+      placeholder: Describe the desired behavior or feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives-considered
+    attributes:
+      label: Alternatives Considered
+      description: A clear and concise description of any alternative solutions, features, or workarounds you've considered.
+      placeholder: Describe any alternative approaches...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, mockups, or examples about the feature request here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: validation-checklist
+    attributes:
+      label: Checklist
+      description: Please verify before submitting.
+      options:
+        - label: I have verified that this feature has not already been requested
+          required: true
