@@ -1,0 +1,55 @@
+name: domotica-prod
+
+services:
+  db:
+    container_name: database
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: prod
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-pwd123!-}
+    volumes:
+      - ./.db-data-prod:/var/lib/postgresql/:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} && 
+              psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1' >/dev/null 2>&1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  site:
+    container_name: site
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: 1
+      FLASK_SESSION_COOKIE_HTTPONLY: "true"
+      FLASK_SESSION_COOKIE_SECURE: "true"
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-change-me-in-prod-@123!}
+      DATABASE_URL: "postgresql://user:${DATABASE_PASSWORD:-pwd123!-}@db/prod"
+      PORT: 8080
+      # GitHub integration
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+      GITHUB_APP_KEY: ${GITHUB_APP_KEY}
+      GITHUB_INSTALLATION_ID: ${GITHUB_INSTALLATION_ID}
+      GITHUB_REPO: ${GITHUB_REPO}
+      GITHUB_OWNER: ${GITHUB_OWNER}
+      ENABLE_REPORTS: false
+    ports:
+      - "${PORT:-80}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - site-build:/data/public:rw
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  site-build:

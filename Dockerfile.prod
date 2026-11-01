@@ -1,0 +1,23 @@
+# Use the same base image as Dockerfile.dev for consistency
+FROM python:3.14-slim-trixie
+
+WORKDIR /data
+
+# Add curl for healthcheck purposes
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir . gunicorn==23.0.0
+COPY --chmod=755 build.sh ./
+COPY db/ ./db/
+COPY webserver/ ./webserver/
+COPY static/ ./static/
+
+VOLUME /data/public
+
+# Run build.sh to initialize DB and prepare static files, 
+# then start the production server
+ENTRYPOINT ["./build.sh"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "webserver.app:app"]

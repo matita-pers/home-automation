@@ -21,7 +21,7 @@ __pycache__/
 # Other hidden data
 .*
 # Exclude example files
-!*.example
+!*.example*
 
 # Github data
 !.github/

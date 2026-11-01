@@ -8,8 +8,15 @@ x-site: &base-site
       PYTHONUNBUFFERED: 1
       FLASK_SESSION_COOKIE_HTTPONLY: true
       FLASK_SESSION_COOKIE_SECURE: false
-      FLASK_SECRET_KEY: "change-me@123!"
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-change-me@123!}
       DATABASE_URL: "postgresql://user:pwd123%40@db/dev"
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+      GITHUB_APP_KEY: ${GITHUB_APP_KEY}
+      GITHUB_INSTALLATION_ID: ${GITHUB_INSTALLATION_ID}
+      GITHUB_REPO: ${GITHUB_REPO}
+      GITHUB_OWNER: ${GITHUB_OWNER}
+      GITHUB_ISSUE_LABELS: "triage, test"
+      ENABLE_REPORTS: true
   environment: *site-env
   ports:
     - "0.0.0.0:8080:5000"
