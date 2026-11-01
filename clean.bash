@@ -32,8 +32,7 @@ fi
 
 # Stop containers and remove locally built images.
 echo "Stopping $PROFILE environment..."
-docker compose -f "$COMPOSE_FILE" \
-    --profile "$PROFILE" down -v --rmi local --remove-orphans
+docker compose -f "$COMPOSE_FILE" --profile "$PROFILE" down -v --rmi local --remove-orphans
 
 if [[ "$STEP" -eq 2 ]]; then
     echo "Skipping database cleanup and seeding."

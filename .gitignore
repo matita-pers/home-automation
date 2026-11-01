@@ -18,5 +18,10 @@ __pycache__/
 .vscode/
 .idea/
 
-#testing data
-.db-data/
+# Other hidden data
+.*
+# Exclude example files
+!*.example
+
+# Github data
+!.github/
